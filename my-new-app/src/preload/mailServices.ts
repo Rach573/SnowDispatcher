@@ -1,21 +1,24 @@
-// src/preload/mailServices.ts
-
 import { ipcRenderer } from 'electron';
-import type { Tache } from '../shared/types/DatabaseModels';
+import type { Mail } from '../shared/types/DatabaseModels';
 
-interface CreateTicketResult {
-  id: number;
-}
-
-// API pont (noms côté renderer orientés "tasks" mais handlers côté main en "tickets")
+/**
+ * API exposée au renderer pour interagir avec les mails.
+ */
 export const mailServices = {
-  getAllTasks: (): Promise<Tache[]> => {
-    return ipcRenderer.invoke('tickets:getAll');
+  /**
+   * Récupérer tous les mails non encore assignés.
+   */
+  getAllMails: async (): Promise<Mail[]> => {
+    return await ipcRenderer.invoke('mails:getAll');
   },
-  createTask: (mailId: number, agentUserId: number): Promise<CreateTicketResult> => {
-    return ipcRenderer.invoke('tickets:create', mailId, agentUserId);
-  }
-  // Futurs ajouts: resolveTask, updateTicketStatus, stats...
+
+  /**
+   * Assigner un mail à un agent (marquage côté mail uniquement). La création d'un ticket
+   * s'effectue via tacheServices.createTache().
+   */
+  assignMail: async (mailId: number, agentUserId: number): Promise<void> => {
+    await ipcRenderer.invoke('mails:assign', mailId, agentUserId);
+  },
 };
 
 export type MailServices = typeof mailServices;

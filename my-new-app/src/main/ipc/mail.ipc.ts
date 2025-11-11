@@ -1,20 +1,18 @@
-// src/main/ipc/mail.ipc.ts
-import { ipcMain } from "electron";
-import * as dispatchService from "../services/DispatchService";
+import { ipcMain } from 'electron';
+import { MailService } from '../services/MailService';
 
 /**
- * Enregistre tous les handlers IPC liés aux mails et tickets
+ * Enregistre les gestionnaires IPC pour les opérations liées aux mails.
+ * Ces canaux sont consommés côté renderer via `ipcRenderer.invoke()`.
  */
-export function registerMailIpcHandlers() {
-  ipcMain.handle("tickets:getAll", async () => {
-    return await dispatchService.getAllTickets();
+export function registerMailHandlers(prisma?: any): void {
+  const service = new MailService(prisma);
+
+  ipcMain.handle('mails:getAll', async () => {
+    return await service.getAllMails();
   });
 
-  ipcMain.handle("tickets:create", async (_event, mailId: number, agentUserId: number) => {
-    return await dispatchService.createTicket(mailId, agentUserId);
+  ipcMain.handle('mails:assign', async (_event, mailId: number, agentUserId: number) => {
+    await service.assignMail(mailId, agentUserId);
   });
-
-  // Futurs handlers potentiels:
-  // ipcMain.handle("tickets:resolve", ...)
-  // ipcMain.handle("stats:getGenderCount", ...)
 }

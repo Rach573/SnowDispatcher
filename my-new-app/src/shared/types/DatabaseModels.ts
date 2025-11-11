@@ -1,16 +1,15 @@
-// src/shared/types/DatabaseModels.ts
+// Types centralisés décrivant la structure des tables et enums de la base Prisma
 
-// --- Types de base ---
-
+// Enums utilisés dans plusieurs tables
 export type StaffHierarchie = 'Leader' | 'N+1' | 'Employé Lambda';
 export type MailPriorite = 'Alerte Rouge' | 'Urgent' | 'Normale';
 export type MailStatut = 'Nouveau' | 'Assigné' | 'Résolu';
 export type UserRole = 'admin' | 'agent';
 export type Genre = 'M' | 'F' | 'Autre';
-export type GenderStat = 'F' | 'M' | 'X' | 'U'; // U=Unknown/Null
+export type GenderStat = 'F' | 'M' | 'X' | 'U'; // U = Inconnu
 
 /**
- * Table `departements`
+ * Table `departements` : différents services de l'entreprise
  */
 export interface Departement {
   id: number;
@@ -18,8 +17,7 @@ export interface Departement {
 }
 
 /**
- * Table `staff` (Employés de l'entreprise QUI ENVOIENT les mails)
- * Rôle: Définit la priorité des mails entrants et les stats.
+ * Table `staff` : employés qui envoient les mails
  */
 export interface Staff {
   id: number;
@@ -33,8 +31,7 @@ export interface Staff {
 }
 
 /**
- * Table `users` (Équipe IT QUI UTILISE l'application)
- * Rôle: Gère l'authentification et les permissions.
+ * Table `users` : utilisateurs IT qui utilisent l'application
  */
 export interface User {
   id: number;
@@ -45,7 +42,7 @@ export interface User {
 }
 
 /**
- * Table `category`
+ * Table `category` : catégories de mail
  */
 export interface Category {
   id: number;
@@ -53,7 +50,7 @@ export interface Category {
 }
 
 /**
- * Table `privacy`
+ * Table `privacy` : niveaux de confidentialité des mails
  */
 export interface Privacy {
   id: number;
@@ -61,7 +58,7 @@ export interface Privacy {
 }
 
 /**
- * Table `mail` (Le message entrant)
+ * Table `mail` : messages entrants non assignés
  */
 export interface Mail {
   id: number;
@@ -75,8 +72,7 @@ export interface Mail {
 }
 
 /**
- * Table `taches` (Le ticket de suivi)
- * Lie un Mail (mail.id) à un Agent IT (users.id)
+ * Table `taches` : tickets de suivi liés à un mail et un agent
  */
 export interface Tache {
   id: number;
@@ -89,7 +85,7 @@ export interface Tache {
 }
 
 /**
- * Table `stats_gender_mail_count`
+ * Table `stats_gender_mail_count` : nombre de mails reçus par genre
  */
 export interface StatsGenderMailCount {
   id: number;
@@ -98,19 +94,19 @@ export interface StatsGenderMailCount {
 }
 
 /**
- * Table `stat_mail_by_gender`
+ * Table `stat_mail_by_gender` : statistique quotidienne par genre
  */
 export interface StatMailByGender {
-  stat_date: string; // DATE
+  stat_date: string;
   gender: GenderStat;
   mail_count: number;
 }
 
 /**
- * Table `stat_mail_by_priority`
+ * Table `stat_mail_by_priority` : statistique quotidienne par priorité
  */
 export interface StatMailByPriority {
-  stat_date: string; // DATE
+  stat_date: string;
   priority_id: number;
   mail_count: number;
 }

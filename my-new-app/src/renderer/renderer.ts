@@ -1,9 +1,6 @@
-// src/renderer/renderer.ts
-
 import { createApp } from 'vue';
 import App from './App.vue';
 import '../index.css';
 
-// Mount Vue application
-const app = createApp(App);
-app.mount('#app');
+// Point d'entrée du renderer : création et montage de l'application Vue
+createApp(App).mount('#app');
