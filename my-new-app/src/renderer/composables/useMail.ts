@@ -2,8 +2,8 @@ import { ref } from 'vue';
 import type { Mail } from '../../shared/types/DatabaseModels';
 
 /**
- * Composable chargé de gérer l'état des mails dans l'interface.
- * Utilise les API exposées par le preload pour récupérer les mails non assignés.
+ * Composable responsible for managing mail state in the UI.
+ * Uses the API exposed by the preload to retrieve unassigned mails.
  */
 export function useMail() {
   const mails = ref<Mail[]>([]);
@@ -14,11 +14,11 @@ export function useMail() {
     loading.value = true;
     error.value = null;
     try {
-      // window.api.mail est injecté par le preload
-      mails.value = await (window as any).api.mail.getAllMails();
+      // window.api.mail is injected by the preload
+      mails.value = await window.api.mail.getAllMails();
     } catch (e) {
-      const errMsg = e instanceof Error ? e.message : 'Erreur inconnue';
-      error.value = `Erreur lors du chargement des mails : ${errMsg}`;
+      const errMsg = e instanceof Error ? e.message : 'Unknown error';
+      error.value = `Error loading mails: ${errMsg}`;
       mails.value = [];
     } finally {
       loading.value = false;

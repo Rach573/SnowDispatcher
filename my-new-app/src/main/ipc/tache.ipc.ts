@@ -2,10 +2,10 @@ import { ipcMain } from 'electron';
 import { TacheService } from '../services/TacheService';
 
 /**
- * Enregistre les canaux IPC relatifs aux tâches (tickets de suivi).
+ * Registers IPC channels related to tasks/tickets.
  */
-export function registerTacheHandlers(prisma?: any): void {
-  const service = new TacheService(prisma);
+export function registerTacheHandlers(): void {
+  const service = new TacheService();
 
   ipcMain.handle('taches:getAll', async () => {
     return await service.getAll();

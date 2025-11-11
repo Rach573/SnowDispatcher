@@ -1,35 +1,29 @@
 // src/main/services/MailService.ts
-import { prisma } from '../repositories/prisma/client'; // MODIFIÉ : Importer l'instance unique
+import { MailRepository } from '../repositories/MailRepository';
 import type { Mail } from '../../shared/types/DatabaseModels';
 
 /**
- * Service responsable des opérations liées aux mails non assignés.
+ * Service responsible for business logic related to mails.
+ * Uses MailRepository for data access.
  */
 export class MailService {
-  // Supprimé : On n'a plus besoin d'un constructeur ou d'un 'this.prisma'
-  // private prisma: PrismaClient;
+  private repository: MailRepository;
 
-  /**
-   * Récupère la liste des mails non encore assignés à un ticket.
-   */
-  async getAllMails(): Promise<Mail[]> {
-    // MODIFIÉ : Utilise l'instance 'prisma' importée
-    const mails = await prisma.mail.findMany({
-      where: {
-        handler_user_id: null,
-      },
-    });
-    return mails as unknown as Mail[];
+  constructor() {
+    this.repository = new MailRepository();
   }
 
   /**
-   * Marque un mail comme traité en lui assignant un agent IT.
+   * Retrieves the list of mails not yet assigned to a ticket.
+   */
+  async getAllMails(): Promise<Mail[]> {
+    return await this.repository.findUnassignedMails();
+  }
+
+  /**
+   * Assigns a mail to an IT agent.
    */
   async assignMail(mailId: number, agentUserId: number): Promise<void> {
-    // MODIFIÉ : Utilise l'instance 'prisma' importée
-    await prisma.mail.update({
-      where: { id: mailId },
-      data: { handler_user_id: agentUserId },
-    });
+    await this.repository.assignToHandler(mailId, agentUserId);
   }
 }

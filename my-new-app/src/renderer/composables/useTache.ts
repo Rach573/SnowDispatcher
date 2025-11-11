@@ -2,8 +2,8 @@ import { ref } from 'vue';
 import type { Tache } from '../../shared/types/DatabaseModels';
 
 /**
- * Composable chargé de la gestion des tâches (tickets) côté UI.
- * Il s'appuie sur l'API tache exposée par le preload.
+ * Composable responsible for managing tasks/tickets in the UI.
+ * Uses the tache API exposed by the preload.
  */
 export function useTache() {
   const taches = ref<Tache[]>([]);
@@ -14,10 +14,10 @@ export function useTache() {
     loading.value = true;
     error.value = null;
     try {
-      taches.value = await (window as any).api.tache.getAllTaches();
+      taches.value = await window.api.tache.getAllTaches();
     } catch (e) {
-      const errMsg = e instanceof Error ? e.message : 'Erreur inconnue';
-      error.value = `Erreur lors du chargement des tâches : ${errMsg}`;
+      const errMsg = e instanceof Error ? e.message : 'Unknown error';
+      error.value = `Error loading tasks: ${errMsg}`;
       taches.value = [];
     } finally {
       loading.value = false;
@@ -28,13 +28,13 @@ export function useTache() {
     loading.value = true;
     error.value = null;
     try {
-      const result = await (window as any).api.tache.createTache(mailId, agentUserId);
-      // Recharge la liste après création
+      const result = await window.api.tache.createTache(mailId, agentUserId);
+      // Reload list after creation
       await loadTaches();
       return result;
     } catch (e) {
-      const errMsg = e instanceof Error ? e.message : 'Erreur inconnue';
-      error.value = `Erreur lors de la création de la tâche : ${errMsg}`;
+      const errMsg = e instanceof Error ? e.message : 'Unknown error';
+      error.value = `Error creating task: ${errMsg}`;
       throw e;
     } finally {
       loading.value = false;

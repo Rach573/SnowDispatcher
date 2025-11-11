@@ -1,4 +1,8 @@
 // src/main/services/Database.ts
+// DEPRECATED: This file is no longer used. Prisma is now used for database access.
+// See src/main/repositories/prisma/client.ts for the new Prisma-based approach.
+
+/*
 import mysql from 'mysql2/promise';
 import { logger } from '../utils/logger';
 
@@ -14,3 +18,4 @@ export const pool = mysql.createPool({
 });
 
 logger.info('Pool de connexions à la base de données créé');
+*/

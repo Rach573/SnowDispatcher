@@ -1,8 +1,12 @@
 import type { MailServices } from '../../preload/mailServices';
+import type { TacheServices } from '../../preload/tacheServices';
 
 declare global {
   interface Window {
-    api: MailServices; // { getAllTasks, createTask }
+    api: {
+      mail: MailServices;
+      tache: TacheServices;
+    };
   }
 }
 
