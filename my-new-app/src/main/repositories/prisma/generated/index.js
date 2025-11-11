@@ -266,7 +266,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\elrai\\Downloads\\MailDispatcher-majSnowDispatcher\\MailDispatcher-majSnowDispatcher\\my-new-app\\src\\main\\repositories\\prisma\\generated",
+      "value": "C:\\Users\\elrai\\Downloads\\MailDispatcher-majSnowDispatcher\\SnowDispatcher\\my-new-app\\src\\main\\repositories\\prisma\\generated",
       "fromEnvVar": null
     },
     "config": {
@@ -280,11 +280,12 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\elrai\\Downloads\\MailDispatcher-majSnowDispatcher\\MailDispatcher-majSnowDispatcher\\my-new-app\\src\\main\\repositories\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\elrai\\Downloads\\MailDispatcher-majSnowDispatcher\\SnowDispatcher\\my-new-app\\src\\main\\repositories\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": null
+    "rootEnvPath": null,
+    "schemaEnvPath": "../../../../../.env"
   },
   "relativePath": "..",
   "clientVersion": "6.19.0",
