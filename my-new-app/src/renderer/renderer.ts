@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
 import App from './App.vue';
-import '../index.css';
+import { router } from './router';
+import './style/global.css';
 
-// Point d'entrée du renderer : création et montage de l'application Vue
-createApp(App).mount('#app');
+// Entry point for the renderer: create and mount Vue application with router
+createApp(App).use(router).mount('#app');
