@@ -15,38 +15,32 @@
         </label>
 
         <div class="actions">
-          <button type="submit">Se connecter</button>
+          <button type="submit" :disabled="loading">
+            {{ loading ? 'Connexion...' : 'Se connecter' }}
+          </button>
         </div>
       </form>
 
       <div class="info">
-        <p v-if="noteDefault">Compte admin par défaut : <strong>admin</strong> / <strong>admin</strong></p>
         <p v-if="error" class="error">{{ error }}</p>
-        <p class="hint">Compte non référencé ? Contactez l'administrateur pour créer un compte (maximum 4 comptes).</p>
-        <p class="hint">Mot de passe perdu ? Contactez l'administrateur pour réinitialisation.</p>
+        <p class="hint">Compte non reference ? Contactez l'administrateur pour creer un compte (maximum 4 comptes).</p>
+        <p class="hint">Mot de passe perdu ? Contactez l'administrateur pour reinitialisation.</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { seedUsersIfNeeded, validateCredentials, findUser, setCurrentUser, getUsers } from '../utils/auth';
+import { login } from '../utils/auth';
 
 const router = useRouter();
 
 const username = ref('');
 const password = ref('');
 const error = ref('');
-const noteDefault = ref(false);
-
-onMounted(() => {
-  seedUsersIfNeeded();
-  // If only default admin present show a note
-  const users = getUsers();
-  if (users.length === 1 && users[0].username === 'admin') noteDefault.value = true;
-});
+const loading = ref(false);
 
 async function onSubmit() {
   error.value = '';
@@ -55,21 +49,16 @@ async function onSubmit() {
     return;
   }
 
-  const user = findUser(username.value.trim());
-  if (!user) {
-    error.value = "Compte non trouvé — contactez l'administrateur (max 4 comptes).";
-    return;
+  loading.value = true;
+  try {
+    await login(username.value.trim(), password.value);
+    router.push('/');
+  } catch (e) {
+    const errMsg = e instanceof Error ? e.message : 'Erreur de connexion.';
+    error.value = errMsg;
+  } finally {
+    loading.value = false;
   }
-
-  if (!validateCredentials(username.value.trim(), password.value)) {
-    error.value = 'Identifiants incorrects.';
-    return;
-  }
-
-  // Store the full user object (including id) as current user
-  setCurrentUser(user);
-  // Redirect to home
-  router.push('/');
 }
 </script>
 
@@ -93,6 +82,7 @@ async function onSubmit() {
 .login-card input { width: 100%; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px; }
 .actions { margin-top: 1rem; text-align: right; }
 .actions button { background: #2563eb; color: white; border: none; padding: 0.6rem 1rem; border-radius: 6px; cursor: pointer; }
+.actions button[disabled] { opacity: 0.6; cursor: not-allowed; }
 .hint { color: #64748b; font-size: 0.85rem; margin-top: 0.6rem; }
 .error { color: #b91c1c; background: #fee2e2; padding: 0.5rem; border-radius: 6px; margin-top: 0.6rem; }
 </style>

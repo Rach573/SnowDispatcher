@@ -25,7 +25,7 @@
             <td>{{ u.role }}</td>
             <td>
               <button @click="promptReset(u.username)">Reinitialiser mot de passe</button>
-              <button @click="handleDelete(u.username)" :disabled="u.username === current?.username">Supprimer</button>
+              <button @click="handleDelete(u.username)" :disabled="u.username === currentUser?.username">Supprimer</button>
             </td>
           </tr>
         </tbody>
@@ -74,18 +74,19 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { getUsers, createUserWithCredentials, deleteUser, resetPassword, getCurrentUser } from '../utils/auth';
+import { fetchUsers, createUserWithCredentials, deleteUser, resetPassword, getCurrentUser } from '../utils/auth';
 import { useRouter } from 'vue-router';
 import { useAdminMail } from '../composables/useAdminMail';
+import type { AuthUser } from '../../shared/types/Auth';
 
 const router = useRouter();
-const users = ref(getUsers());
+const users = ref<AuthUser[]>([]);
 const newUsername = ref('');
 const newPassword = ref('');
 const createError = ref('');
 const creating = ref(false);
 const maxSlots = 4;
-const current = ref(getCurrentUser());
+const currentUser = ref(getCurrentUser());
 
 const {
   mails: adminMails,
@@ -98,17 +99,21 @@ const {
 
 const reassignTargets = ref<Record<number, number | null>>({});
 
-function refreshAccounts() {
-  users.value = getUsers();
+async function refreshAccounts() {
+  try {
+    users.value = await fetchUsers();
+  } catch (e) {
+    createError.value = e instanceof Error ? e.message : 'Erreur de chargement des comptes.';
+  }
 }
 
-onMounted(() => {
-  refreshAccounts();
-  if (!current.value || current.value.role !== 'admin') {
+onMounted(async () => {
+  if (!currentUser.value || currentUser.value.role !== 'admin') {
     router.push('/');
     return;
   }
-  loadAllMails();
+  await refreshAccounts();
+  await loadAllMails();
 });
 
 async function handleCreate() {
@@ -118,29 +123,38 @@ async function handleCreate() {
     return;
   }
   creating.value = true;
-  const ok = createUserWithCredentials(newUsername.value.trim(), newPassword.value, 'user');
-  if (!ok) {
-    createError.value = 'Impossible de creer : nom existant ou limite atteinte.';
-  } else {
+  try {
+    await createUserWithCredentials(newUsername.value.trim(), newPassword.value, 'agent');
     newUsername.value = '';
     newPassword.value = '';
-    refreshAccounts();
+    await refreshAccounts();
+  } catch (e) {
+    createError.value = e instanceof Error ? e.message : 'Impossible de creer le compte.';
+  } finally {
+    creating.value = false;
   }
-  creating.value = false;
 }
 
-function handleDelete(username: string) {
-  if (username === current.value?.username) return;
+async function handleDelete(username: string) {
+  if (username === currentUser.value?.username) return;
   if (!confirm(`Supprimer le compte ${username} ?`)) return;
-  deleteUser(username);
-  refreshAccounts();
+  try {
+    await deleteUser(username);
+    await refreshAccounts();
+  } catch (e) {
+    alert(e instanceof Error ? e.message : 'Erreur lors de la suppression.');
+  }
 }
 
-function promptReset(username: string) {
+async function promptReset(username: string) {
   const np = prompt(`Nouveau mot de passe pour ${username} :`, 'changeme');
   if (!np) return;
-  resetPassword(username, np);
-  alert('Mot de passe reinitialise.');
+  try {
+    await resetPassword(username, np);
+    alert('Mot de passe reinitialise.');
+  } catch (e) {
+    alert(e instanceof Error ? e.message : 'Erreur lors de la reinitialisation.');
+  }
 }
 
 function formatMailDate(dateStr: string) {

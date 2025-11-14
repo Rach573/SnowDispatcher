@@ -16,7 +16,8 @@
     "prisma:generate": "prisma generate --schema=./src/main/repositories/prisma/schema.prisma",
     "prisma:push": "prisma db push --schema=./src/main/repositories/prisma/schema.prisma",
     "prisma:studio": "prisma studio --schema=./src/main/repositories/prisma/schema.prisma",
-    "seed:mail": "node ./scripts/seed-prisma-mail.js"
+    "seed:mail": "node ./scripts/seed-prisma-mail.js",
+    "reset:admin": "node ./scripts/reset-admin-password.js"
   },
   "keywords": [],
   "author": {

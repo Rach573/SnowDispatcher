@@ -12,10 +12,10 @@ export default defineConfig({
     devSourcemap: false,
   },
   optimizeDeps: {
-    // Demander à esbuild de ne pas générer de sourcemaps pour les dépendances pré-bundlées
+    // Force une re-optimisation à chaque démarrage pour éviter les 504 "Outdated Optimize Dep"
+    force: true,
     esbuildOptions: {
-      // certains environnements/types ne déclarent pas ce champ, mais il est passé à esbuild
-      sourcemap: false as unknown as boolean,
+      sourcemap: false,
     },
   },
 });

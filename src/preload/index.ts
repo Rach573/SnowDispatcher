@@ -1,6 +1,7 @@
 import { contextBridge } from 'electron';
 import { mailServices } from './mailServices';
 import { tacheServices } from './tacheServices';
+import { authServices } from './authServices';
 
 /**
  * Expose une API structurée dans le contexte global du renderer. Les sous-objets
@@ -14,6 +15,7 @@ try {
   contextBridge.exposeInMainWorld('api', {
     mail: mailServices,
     tache: tacheServices,
+    auth: authServices,
   });
   // Also add a debug log so we can confirm preload execution in DevTools
   // (this will appear in the renderer DevTools console)
@@ -26,5 +28,6 @@ try {
   (globalThis as any).api = {
     mail: mailServices,
     tache: tacheServices,
+    auth: authServices,
   };
 }

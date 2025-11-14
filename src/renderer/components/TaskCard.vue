@@ -20,7 +20,6 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 import type { Tache } from '../../shared/types/DatabaseModels';
-import { getUsers } from '../utils/auth';
 
 interface Props {
   task: Tache;
@@ -46,15 +45,11 @@ const formatDate = (dateStr: string | null) => {
 };
 
 const agentName = computed(() => {
-  // Prefer agent_username returned by the service (joined from DB)
   const usernameFromService = (props.task as any).agent_username as string | undefined | null;
   if (usernameFromService) return usernameFromService;
-
   const uid = props.task.agent_user_id as unknown as number | null;
   if (!uid) return '';
-  const users = getUsers();
-  const u = users.find((x) => x.id === uid);
-  return u ? u.username : `#${uid}`;
+  return `#${uid}`;
 });
 </script>
 

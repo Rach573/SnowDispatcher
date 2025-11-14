@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { registerMailHandlers } from './ipc/mail.ipc';
 import { registerTacheHandlers } from './ipc/tache.ipc';
+import { registerAuthHandlers } from './ipc/auth.ipc';
 import { OutlookSyncService } from './services/OutlookSyncService';
 import { MailRepository } from './repositories/MailRepository';
 
@@ -89,6 +90,7 @@ function createWindow(): void {
 
 // Enregistrement des handlers avant la création de la fenêtre
 app.whenReady().then(() => {
+  registerAuthHandlers();
   registerMailHandlers();
   registerTacheHandlers();
   createWindow();
