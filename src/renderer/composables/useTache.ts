@@ -1,6 +1,11 @@
 import { ref } from 'vue';
 import type { Tache } from '../../shared/types/DatabaseModels';
 
+type LoadTachesOptions = {
+  agentUserId?: number | null;
+  agentUsername?: string | null;
+};
+
 /**
  * Composable responsible for managing tasks/tickets in the UI.
  * Uses the tache API exposed by the preload.
@@ -10,11 +15,18 @@ export function useTache() {
   const loading = ref(false);
   const error = ref<string | null>(null);
 
-  async function loadTaches() {
+  async function loadTaches(options?: LoadTachesOptions) {
     loading.value = true;
     error.value = null;
     try {
-      taches.value = await window.api.tache.getAllTaches();
+      if (options?.agentUserId != null || options?.agentUsername) {
+        taches.value = await window.api.tache.getTachesForAgent({
+          agentUserId: options?.agentUserId ?? null,
+          agentUsername: options?.agentUsername ?? null,
+        });
+      } else {
+        taches.value = await window.api.tache.getAllTaches();
+      }
     } catch (e) {
       const errMsg = e instanceof Error ? e.message : 'Unknown error';
       error.value = `Error loading tasks: ${errMsg}`;

@@ -17,25 +17,9 @@ export class TacheService {
   }
 
   /**
-   * Computes the priority of a mail based on the sender's hierarchical status.
+   * Normalizes DB tasks and sorts them by priority (desc) then date.
    */
-  computePriorite(statut: StaffHierarchie | null): MailPriorite {
-    switch (statut) {
-      case 'Leader':
-        return 'Alerte Rouge';
-      case 'N+1':
-        return 'Urgent';
-      default:
-        return 'Normale';
-    }
-  }
-
-  /**
-   * Returns all existing tasks.
-   */
-  async getAll(): Promise<Tache[]> {
-    const tasksFromDb = await this.tacheRepository.findAll();
-
+  private normalizeAndSort(tasksFromDb: Tache[]): Tache[] {
     // Define ranking for DB priority values (Prisma stores e.g. 'Alerte_Rouge')
     const priorityRank: Record<string, number> = {
       Alerte_Rouge: 3,
@@ -72,6 +56,36 @@ export class TacheService {
     });
 
     return normalized;
+  }
+
+  /**
+   * Computes the priority of a mail based on the sender's hierarchical status.
+   */
+  computePriorite(statut: StaffHierarchie | null): MailPriorite {
+    switch (statut) {
+      case 'Leader':
+        return 'Alerte Rouge';
+      case 'N+1':
+        return 'Urgent';
+      default:
+        return 'Normale';
+    }
+  }
+
+  /**
+   * Returns all existing tasks.
+   */
+  async getAll(): Promise<Tache[]> {
+    const tasksFromDb = await this.tacheRepository.findAll();
+    return this.normalizeAndSort(tasksFromDb);
+  }
+
+  /**
+   * Returns tickets assigned to a specific agent.
+   */
+  async getByAgent(filters: { agentUserId?: number | null; agentUsername?: string | null }): Promise<Tache[]> {
+    const tasksFromDb = await this.tacheRepository.findByAgent(filters);
+    return this.normalizeAndSort(tasksFromDb);
   }
 
   /**

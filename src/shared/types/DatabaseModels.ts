@@ -69,6 +69,7 @@ export interface Mail {
   categorie_id: number | null;
   privacy_id: number | null;
   handler_user_id: number | null;
+  handler_username?: string | null;
 }
 
 /**

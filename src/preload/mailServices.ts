@@ -2,22 +2,43 @@ import { ipcRenderer } from 'electron';
 import type { Mail } from '../shared/types/DatabaseModels';
 
 /**
- * API exposée au renderer pour interagir avec les mails.
+ * API exposee au renderer pour interagir avec les mails.
  */
 export const mailServices = {
   /**
-   * Récupérer tous les mails non encore assignés.
+   * Recuperer tous les mails non encore assignes.
    */
   getAllMails: async (): Promise<Mail[]> => {
     return await ipcRenderer.invoke('mails:getAll');
   },
 
   /**
-   * Assigner un mail à un agent (marquage côté mail uniquement). La création d'un ticket
+   * Recuperer l'ensemble des mails pour les administrateurs.
+   */
+  getAdminMails: async (): Promise<Mail[]> => {
+    return await ipcRenderer.invoke('mails:getAdminList');
+  },
+
+  /**
+   * Assigner un mail a un agent (marquage cote mail uniquement). La creation d'un ticket
    * s'effectue via tacheServices.createTache().
    */
   assignMail: async (mailId: number, agentUserId: number): Promise<void> => {
     await ipcRenderer.invoke('mails:assign', mailId, agentUserId);
+  },
+
+  /**
+   * Supprimer un mail.
+   */
+  deleteMail: async (mailId: number): Promise<void> => {
+    await ipcRenderer.invoke('mails:delete', mailId);
+  },
+
+  /**
+   * Reassigner un mail a un autre agent.
+   */
+  reassignMail: async (mailId: number, agentUserId: number): Promise<void> => {
+    await ipcRenderer.invoke('mails:reassign', mailId, agentUserId);
   },
 
   /**

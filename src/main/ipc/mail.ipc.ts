@@ -12,7 +12,19 @@ export function registerMailHandlers(): void {
     return await service.getAllMails();
   });
 
+  ipcMain.handle('mails:getAdminList', async () => {
+    return await service.getAdminMails();
+  });
+
   ipcMain.handle('mails:assign', async (_event, mailId: number, agentUserId: number) => {
     await service.assignMail(mailId, agentUserId);
+  });
+
+  ipcMain.handle('mails:delete', async (_event, mailId: number) => {
+    await service.deleteMail(mailId);
+  });
+
+  ipcMain.handle('mails:reassign', async (_event, mailId: number, agentUserId: number) => {
+    await service.reassignMail(mailId, agentUserId);
   });
 }

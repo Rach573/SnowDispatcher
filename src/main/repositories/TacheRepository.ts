@@ -1,5 +1,6 @@
 // src/main/repositories/TacheRepository.ts
 import { prisma } from './prisma/client';
+import type { Prisma } from './prisma/generated/client';
 import { logger } from '../utils/logger';
 import type { Tache, Staff } from '../../shared/types/DatabaseModels';
 
@@ -30,6 +31,41 @@ export class TacheRepository {
   }
 
   /**
+   * Retrieves tasks filtered by agent.
+   */
+  async findByAgent(params: { agentUserId?: number | null; agentUsername?: string | null }): Promise<Tache[]> {
+    const { agentUserId, agentUsername } = params;
+    logger.info(
+      `TacheRepository.findByAgent: loading tasks for agent filters -> id=${agentUserId} username=${agentUsername}`,
+    );
+
+    const whereClause: Prisma.tachesWhereInput = {};
+    if (typeof agentUserId === 'number' && !Number.isNaN(agentUserId)) {
+      whereClause.agent_user_id = agentUserId;
+    } else if (agentUsername) {
+      whereClause.agent = {
+        username: agentUsername,
+      };
+    } else {
+      throw new Error('findByAgent requires agentUserId or agentUsername');
+    }
+
+    const tasks = await prisma.taches.findMany({
+      where: whereClause,
+      orderBy: {
+        date_attribution: 'desc',
+      },
+      include: {
+        agent: {
+          select: { id: true, username: true },
+        },
+      },
+    });
+    logger.info(`TacheRepository.findByAgent: returned ${tasks.length} rows`);
+    return tasks as unknown as Tache[];
+  }
+
+  /**
    * Creates a new tache/ticket in the database.
    */
   async create(data: {
@@ -43,6 +79,20 @@ export class TacheRepository {
       data,
     });
     return { id: created.id };
+  }
+
+  /**
+   * Updates existing tickets linked to a mail to point to a new agent.
+   */
+  async reassignAgentForMail(mailId: number, agentUserId: number): Promise<number> {
+    const result = await prisma.taches.updateMany({
+      where: { mail_id: mailId },
+      data: { agent_user_id: agentUserId },
+    });
+    logger.info(
+      `TacheRepository.reassignAgentForMail: updated ${result.count} tasks for mail ${mailId} to agent ${agentUserId}`,
+    );
+    return result.count;
   }
 
   /**

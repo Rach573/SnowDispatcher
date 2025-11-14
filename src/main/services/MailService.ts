@@ -1,5 +1,6 @@
 // src/main/services/MailService.ts
 import { MailRepository } from '../repositories/MailRepository';
+import { TacheRepository } from '../repositories/TacheRepository';
 import type { Mail } from '../../shared/types/DatabaseModels';
 
 /**
@@ -8,9 +9,11 @@ import type { Mail } from '../../shared/types/DatabaseModels';
  */
 export class MailService {
   private repository: MailRepository;
+  private tacheRepository: TacheRepository;
 
   constructor() {
     this.repository = new MailRepository();
+    this.tacheRepository = new TacheRepository();
   }
 
   /**
@@ -21,9 +24,31 @@ export class MailService {
   }
 
   /**
+   * Retrieves a complete listing of mails for admin usage.
+   */
+  async getAdminMails(): Promise<Mail[]> {
+    return await this.repository.findAllMails();
+  }
+
+  /**
    * Assigns a mail to an IT agent.
    */
   async assignMail(mailId: number, agentUserId: number): Promise<void> {
     await this.repository.assignToHandler(mailId, agentUserId);
+  }
+
+  /**
+   * Deletes a mail (and cascaded tickets if any).
+   */
+  async deleteMail(mailId: number): Promise<void> {
+    await this.repository.deleteById(mailId);
+  }
+
+  /**
+   * Changes the handler for an existing mail and its linked tickets.
+   */
+  async reassignMail(mailId: number, agentUserId: number): Promise<void> {
+    await this.repository.assignToHandler(mailId, agentUserId);
+    await this.tacheRepository.reassignAgentForMail(mailId, agentUserId);
   }
 }
