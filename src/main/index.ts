@@ -1,3 +1,7 @@
+// Load environment variables from .env file
+import dotenv from 'dotenv';
+dotenv.config();
+
 import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -52,7 +56,7 @@ function createWindow(): void {
   // Debug: log whether preload file exists (helps diagnose missing API exposure)
   try {
     const preloadPath = path.join(__dirname, '../preload/index.js');
-    const exists = require('fs').existsSync(preloadPath);
+    const exists = fs.existsSync(preloadPath);
     console.log('Preload path ->', preloadPath, 'exists =', exists);
   } catch (e) {
     console.error('Error checking preload path existence', e);
