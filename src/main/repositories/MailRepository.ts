@@ -124,6 +124,16 @@ export class MailRepository {
   async findById(mailId: number): Promise<Mail | null> {
     const mail = await prisma.mail.findUnique({
       where: { id: mailId },
+      include: {
+        expediteur: {
+          select: {
+            id: true,
+            nom_complet: true,
+            adresse_mail: true,
+            statut_hierarchique: true,
+          },
+        },
+      },
     });
     return mail as unknown as Mail | null;
   }

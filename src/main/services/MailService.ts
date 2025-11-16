@@ -2,6 +2,7 @@
 import { MailRepository } from '../repositories/MailRepository';
 import { TacheRepository } from '../repositories/TacheRepository';
 import type { Mail } from '../../shared/types/DatabaseModels';
+import type { AuthUser } from '../../shared/types/Auth';
 
 /**
  * Service responsible for business logic related to mails.
@@ -50,5 +51,24 @@ export class MailService {
   async reassignMail(mailId: number, agentUserId: number): Promise<void> {
     await this.repository.assignToHandler(mailId, agentUserId);
     await this.tacheRepository.reassignAgentForMail(mailId, agentUserId);
+  }
+
+  /**
+   * Retrieves a single mail with its relations for detail view.
+   * Only admins or the assigned agent can view the content.
+   */
+  async getMailDetail(mailId: number, actor: AuthUser): Promise<Mail> {
+    const mail = await this.repository.findById(mailId);
+    if (!mail) {
+      throw new Error('Mail introuvable.');
+    }
+
+    if (actor.role !== 'admin') {
+      if (mail.handler_user_id !== actor.id) {
+        throw new Error("Vous n'avez pas accès à ce mail.");
+      }
+    }
+
+    return mail;
   }
 }

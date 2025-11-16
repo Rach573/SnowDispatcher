@@ -5,13 +5,15 @@ import AddTaskForm from './pages/AddTaskForm.vue';
 import MonEspace from './pages/MonEspace.vue';
 import Admin from './pages/Admin.vue';
 import Login from './pages/Login.vue';
+import MailDetail from './pages/MailDetail.vue';
 
 const routes = [
   { path: '/', component: Home },
   { path: '/add-task', component: AddTaskForm },
   { path: '/mon-espace', component: MonEspace },
   { path: '/admin', component: Admin },
-  { path: '/login', component: Login }
+  { path: '/login', component: Login },
+  { path: '/mails/:id', component: MailDetail }
 ];
 
 export const router = createRouter({ routes, history: createMemoryHistory() });
@@ -27,12 +29,12 @@ router.beforeEach((to, from, next) => {
 
   const parsed = currentUser ? JSON.parse(currentUser) : null;
   if (parsed && to.path === '/login') {
-    return next('/');
+    return next(parsed.role === 'admin' ? '/' : '/mon-espace');
   }
 
-  // Protect admin route
-  if (to.path === '/admin' && (!parsed || parsed.role !== 'admin')) {
-    return next('/');
+  const adminOnly = ['/', '/add-task', '/admin'];
+  if (adminOnly.includes(to.path) && (!parsed || parsed.role !== 'admin')) {
+    return next('/mon-espace');
   }
 
   return next();

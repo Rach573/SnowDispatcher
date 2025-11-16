@@ -51,8 +51,8 @@ async function onSubmit() {
 
   loading.value = true;
   try {
-    await login(username.value.trim(), password.value);
-    router.push('/');
+    const user = await login(username.value.trim(), password.value);
+    router.push(user.role === 'admin' ? '/' : '/mon-espace');
   } catch (e) {
     const errMsg = e instanceof Error ? e.message : 'Erreur de connexion.';
     error.value = errMsg;

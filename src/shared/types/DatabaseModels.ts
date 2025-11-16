@@ -1,9 +1,9 @@
-// Types centralisés décrivant la structure des tables et enums de la base Prisma
+﻿// Types centralisés décrivant la structure des tables et enums de la base Prisma
 
 // Enums utilisés dans plusieurs tables
-export type StaffHierarchie = 'Leader' | 'N+1' | 'Employé Lambda';
+export type StaffHierarchie = 'Leader' | 'N+1' | 'N' | 'Employe Lambda' | 'Employe_Lambda';
 export type MailPriorite = 'Alerte Rouge' | 'Urgent' | 'Normale';
-export type MailStatut = 'Nouveau' | 'Assigné' | 'Résolu';
+export type MailStatut = 'Nouveau' | 'Assigne' | 'Resolu';
 export type UserRole = 'admin' | 'agent';
 export type Genre = 'M' | 'F' | 'Autre';
 export type GenderStat = 'F' | 'M' | 'X' | 'U'; // U = Inconnu
@@ -70,6 +70,7 @@ export interface Mail {
   privacy_id: number | null;
   handler_user_id: number | null;
   handler_username?: string | null;
+  expediteur?: Staff | null;
 }
 
 /**
@@ -85,6 +86,7 @@ export interface Tache {
   commentaire: string | null;
   // Optional computed field populated by the service when joining the agent user
   agent_username?: string | null;
+  mail?: Mail | null;
 }
 
 /**
@@ -113,3 +115,5 @@ export interface StatMailByPriority {
   priority_id: number;
   mail_count: number;
 }
+
+

@@ -14,15 +14,29 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useTache } from '../composables/useTache';
 import { useRouter } from 'vue-router';
+import { getCurrentUser } from '../utils/auth';
 
 const { createTache, loading, error } = useTache();
 const router = useRouter();
 
 const mailId = ref<number>(0);
 const agentUserId = ref<number>(0);
+const currentUser = ref(getCurrentUser());
+
+onMounted(() => {
+  const user = currentUser.value;
+  if (!user) {
+    router.replace('/login');
+    return;
+  }
+  if (user.role !== 'admin') {
+    router.replace('/mon-espace');
+    return;
+  }
+});
 
 const handleAdd = async () => {
   try {

@@ -42,6 +42,13 @@ export const mailServices = {
   },
 
   /**
+   * Récupérer un mail précis (contenu complet + expéditeur).
+   */
+  getMailById: async (mailId: number): Promise<Mail> => {
+    return await ipcRenderer.invoke('mails:getOne', mailId);
+  },
+
+  /**
    * Subscribe to mail updates from the main process (returns an unsubscribe function).
    * The callback receives the payload sent from main (e.g. { inserted: number }).
    */

@@ -1,5 +1,6 @@
 import { ipcRenderer } from 'electron';
-import type { Tache } from '../shared/types/DatabaseModels';
+import type { Tache, MailStatut } from '../shared/types/DatabaseModels';
+import type { AssignmentEventPayload } from '../shared/types/Events';
 
 /**
  * API exposee au renderer pour interagir avec les taches (tickets).
@@ -25,6 +26,24 @@ export const tacheServices = {
    */
   createTache: async (mailId: number, agentUserId: number): Promise<{ id: number }> => {
     return await ipcRenderer.invoke('taches:create', mailId, agentUserId);
+  },
+
+  /**
+   * Mettre �� jour le statut d'une tache existante.
+   */
+  updateStatut: async (tacheId: number, statut: MailStatut): Promise<void> => {
+    return await ipcRenderer.invoke('taches:updateStatut', tacheId, statut);
+  },
+
+  /**
+   * Ecouter les notifications d'assignation envoyées par le processus main.
+   */
+  onAssigned: (cb: (payload: AssignmentEventPayload) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: AssignmentEventPayload) => cb(payload);
+    ipcRenderer.on('tache:assigned', listener);
+    return () => {
+      ipcRenderer.removeListener('tache:assigned', listener);
+    };
   },
 };
 

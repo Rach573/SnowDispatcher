@@ -4,6 +4,23 @@ import type { Prisma } from './prisma/generated/client';
 import { logger } from '../utils/logger';
 import type { Tache, Staff } from '../../shared/types/DatabaseModels';
 
+const agentSelect = {
+  select: { id: true, username: true },
+};
+
+const mailInclude = {
+  include: {
+    expediteur: {
+      select: {
+        id: true,
+        nom_complet: true,
+        adresse_mail: true,
+        statut_hierarchique: true,
+      },
+    },
+  },
+};
+
 /**
  * Repository responsible for Tache (Task/Ticket) data access operations.
  * Encapsulates all Prisma interactions for the Taches table.
@@ -21,9 +38,8 @@ export class TacheRepository {
         date_attribution: 'desc',
       },
       include: {
-        agent: {
-          select: { id: true, username: true },
-        },
+        agent: agentSelect,
+        mail: mailInclude,
       },
     });
     logger.info(`TacheRepository.findAll: returned ${tasks.length} rows`);
@@ -56,9 +72,8 @@ export class TacheRepository {
         date_attribution: 'desc',
       },
       include: {
-        agent: {
-          select: { id: true, username: true },
-        },
+        agent: agentSelect,
+        mail: mailInclude,
       },
     });
     logger.info(`TacheRepository.findByAgent: returned ${tasks.length} rows`);
@@ -103,5 +118,29 @@ export class TacheRepository {
       where: { id: staffId },
     });
     return staff as unknown as Staff | null;
+  }
+
+  /**
+   * Retrieves a single task by its ID.
+   */
+  async findById(tacheId: number): Promise<Tache | null> {
+    const task = await prisma.taches.findUnique({
+      where: { id: tacheId },
+      include: {
+        agent: agentSelect,
+        mail: mailInclude,
+      },
+    });
+    return task as unknown as Tache | null;
+  }
+
+  /**
+   * Updates the status of a task.
+   */
+  async updateStatut(tacheId: number, statut: string): Promise<void> {
+    await prisma.taches.update({
+      where: { id: tacheId },
+      data: { statut_tache: statut },
+    });
   }
 }

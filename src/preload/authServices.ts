@@ -6,6 +6,9 @@ export const authServices = {
   login: async (username: string, password: string): Promise<AuthUser> => {
     return await ipcRenderer.invoke('auth:login', username, password);
   },
+  logout: async (): Promise<void> => {
+    await ipcRenderer.invoke('auth:logout');
+  },
   getUsers: async (): Promise<AuthUser[]> => {
     return await ipcRenderer.invoke('auth:getUsers');
   },

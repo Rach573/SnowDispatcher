@@ -1,6 +1,9 @@
 <template>
   <div class="admin-page">
-    <h2>Administration des comptes</h2>
+    <div class="admin-header">
+      <button class="back-btn" @click="goBack">Retour</button>
+      <h2>Administration des comptes</h2>
+    </div>
 
     <section class="create">
       <h3>Creer un compte</h3>
@@ -184,6 +187,8 @@ async function submitReassign(mailId: number) {
 
 <style scoped>
 .admin-page { padding: 2rem; }
+.admin-header { display:flex; align-items:center; gap:1rem; margin-bottom:1rem; }
+.back-btn { border:1px solid #cbd5f5; background:transparent; padding:0.4rem 0.8rem; border-radius:6px; cursor:pointer; }
 .form-row { display:flex; gap:0.5rem; align-items:center; }
 input { padding:0.4rem; }
 table { width:100%; border-collapse:collapse; margin-top:1rem; }
@@ -199,3 +204,6 @@ th,td{ border:1px solid #e2e8f0; padding:0.4rem; }
 .no-data { color:#64748b; font-style:italic; margin-top:0.5rem; }
 button[disabled] { opacity:0.6; cursor:not-allowed; }
 </style>
+function goBack() {
+  router.push('/');
+}

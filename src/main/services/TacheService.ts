@@ -1,7 +1,8 @@
 // src/main/services/TacheService.ts
 import { TacheRepository } from '../repositories/TacheRepository';
 import { MailRepository } from '../repositories/MailRepository';
-import type { Tache, MailPriorite, StaffHierarchie } from '../../shared/types/DatabaseModels';
+import type { Tache, MailPriorite, StaffHierarchie, MailStatut } from '../../shared/types/DatabaseModels';
+import type { AuthUser } from '../../shared/types/Auth';
 
 /**
  * Service responsible for business logic related to tasks/tickets.
@@ -28,14 +29,28 @@ export class TacheService {
     };
 
     const rank = (p: string | null | undefined) => (p ? (priorityRank[p] ?? 0) : 0);
+    const arrivalTime = (t: Tache): number => {
+      const mailObj = (t as unknown as { mail?: { date_reception?: Date | string | null } }).mail;
+      const mailDate = mailObj?.date_reception;
+      if (mailDate instanceof Date) {
+        return mailDate.getTime();
+      }
+      if (typeof mailDate === 'string') {
+        const ts = new Date(mailDate).getTime();
+        return Number.isNaN(ts) ? 0 : ts;
+      }
+      if (t.date_attribution) {
+        const ts = new Date(t.date_attribution).getTime();
+        return Number.isNaN(ts) ? 0 : ts;
+      }
+      return 0;
+    };
 
     // Sort by priority (desc) then by date_attribution (desc)
     const sorted = tasksFromDb.slice().sort((a, b) => {
       const pr = rank(b.priorite_calculee as unknown as string) - rank(a.priorite_calculee as unknown as string);
       if (pr !== 0) return pr;
-      const da = a.date_attribution ? new Date(a.date_attribution).getTime() : 0;
-      const db = b.date_attribution ? new Date(b.date_attribution).getTime() : 0;
-      return db - da;
+      return arrivalTime(b) - arrivalTime(a);
     });
 
     // Normalize priorite_calculee for UI (convert 'Alerte_Rouge' -> 'Alerte Rouge')
@@ -47,11 +62,23 @@ export class TacheService {
 
     const normalized: Tache[] = sorted.map((t) => {
       const agentObj = (t as unknown as { agent?: { username?: string } }).agent;
+      const mailObj = (t as unknown as { mail?: any }).mail;
+      const normalizedMail = mailObj
+        ? {
+            ...mailObj,
+            date_reception:
+              mailObj.date_reception instanceof Date
+                ? mailObj.date_reception.toISOString()
+                : mailObj.date_reception ?? null,
+            expediteur: mailObj.expediteur ?? null,
+          }
+        : null;
       return {
         ...t,
         // t may include a joined `agent` object from Prisma; expose agent_username directly
         agent_username: agentObj?.username ?? null,
         priorite_calculee: humanize(t.priorite_calculee as unknown as string) as unknown as Tache['priorite_calculee'],
+        mail: normalizedMail,
       } as Tache;
     });
 
@@ -65,8 +92,11 @@ export class TacheService {
     switch (statut) {
       case 'Leader':
         return 'Alerte Rouge';
+      case 'N':
       case 'N+1':
         return 'Urgent';
+      case 'Employe Lambda':
+      case 'Employe_Lambda':
       default:
         return 'Normale';
     }
@@ -91,7 +121,7 @@ export class TacheService {
   /**
    * Creates a new task based on an existing mail and an IT agent.
    */
-  async createTache(mailId: number, agentUserId: number): Promise<{ id: number }> {
+  async createTache(mailId: number, agentUserId: number): Promise<{ id: number; priorite: MailPriorite }> {
     // Retrieve the mail
     const mail = await this.mailRepository.findById(mailId);
     if (!mail) {
@@ -129,6 +159,27 @@ export class TacheService {
       date_attribution: new Date().toISOString(),
     });
 
-    return { id: created.id };
+    return { id: created.id, priorite };
+  }
+
+  /**
+   * Updates the status of an existing ticket. Agents can only update their own tasks.
+   */
+  async updateStatut(tacheId: number, statut: MailStatut, actor: AuthUser): Promise<void> {
+    const allowed: MailStatut[] = ['Nouveau', 'Assigne', 'Resolu'];
+    if (!allowed.includes(statut)) {
+      throw new Error('Statut invalide.');
+    }
+
+    const task = await this.tacheRepository.findById(tacheId);
+    if (!task) {
+      throw new Error('Tache introuvable.');
+    }
+
+    if (actor.role !== 'admin' && task.agent_user_id !== actor.id) {
+      throw new Error('Vous ne pouvez modifier que vos propres tickets.');
+    }
+
+    await this.tacheRepository.updateStatut(tacheId, statut);
   }
 }

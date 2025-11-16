@@ -4,8 +4,11 @@ import * as fs from 'fs';
 import { registerMailHandlers } from './ipc/mail.ipc';
 import { registerTacheHandlers } from './ipc/tache.ipc';
 import { registerAuthHandlers } from './ipc/auth.ipc';
-import { OutlookSyncService } from './services/OutlookSyncService';
 import { MailRepository } from './repositories/MailRepository';
+import { GmailSyncService } from './services/GmailSyncService';
+import { AutoAssignmentService } from './services/AutoAssignmentService';
+import type { MailSyncResult } from './services/types';
+import type { AssignmentNotification } from '../shared/types/Events';
 
 /**
  * Crée et affiche la fenêtre principale de l'application.
@@ -95,33 +98,73 @@ app.whenReady().then(() => {
   registerTacheHandlers();
   createWindow();
 
-  // Start Outlook sync service on a timer. If credentials are not provided, the service
-  // will run in mock mode (no external calls). We schedule every 15 seconds.
+  // Start mail syncer on a timer. Gmail must be configured, otherwise sync remains disabled.
   const mailRepo = new MailRepository();
-  const outlook = new OutlookSyncService(mailRepo);
+  const gmailSync = new GmailSyncService(mailRepo);
+  const syncServices: Array<{ sync: () => Promise<MailSyncResult> }> = [];
+  if (gmailSync.isConfigured()) {
+    syncServices.push(gmailSync);
+  } else {
+    console.warn(
+      'Gmail sync désactivée: renseignez GMAIL_CLIENT_ID / SECRET / REFRESH_TOKEN / USER_EMAIL puis relancez l’application.',
+    );
+  }
+  const autoAssigner = new AutoAssignmentService(mailRepo);
   let syncTimer: NodeJS.Timeout | null = null;
 
   const runSync = async () => {
-    try {
-      const inserted = await outlook.sync();
-      if (inserted > 0) {
-        // Notify all renderer windows that mails were updated
-        for (const w of BrowserWindow.getAllWindows()) {
-          try {
-            w.webContents.send('mail:updated', { inserted });
-          } catch (e) {
-            console.warn('Failed to send mail:updated to a window', e);
-          }
+    if (syncServices.length === 0) {
+      return;
+    }
+    let totalInserted = 0;
+    const newMailIds: number[] = [];
+
+    for (const service of syncServices) {
+      try {
+        const result = await service.sync();
+        totalInserted += result.inserted;
+        newMailIds.push(...result.mailIds);
+      } catch (e) {
+        console.error('Mail sync error', e);
+      }
+    }
+
+    let assignments: AssignmentNotification[] = [];
+    if (newMailIds.length > 0) {
+      try {
+        assignments = await autoAssigner.assignMails(newMailIds);
+      } catch (e) {
+        console.error('Auto assignment error', e);
+      }
+    }
+
+    if (totalInserted > 0) {
+      // Notify all renderer windows that mails were updated
+      for (const w of BrowserWindow.getAllWindows()) {
+        try {
+          w.webContents.send('mail:updated', { inserted: totalInserted });
+        } catch (e) {
+          console.warn('Failed to send mail:updated to a window', e);
         }
       }
-    } catch (e) {
-      console.error('Outlook sync error', e);
+    }
+
+    if (assignments.length > 0) {
+      for (const w of BrowserWindow.getAllWindows()) {
+        try {
+          w.webContents.send('tache:assigned', { assignments });
+        } catch (e) {
+          console.warn('Failed to send tache:assigned to a window', e);
+        }
+      }
     }
   };
 
   // Run immediately once, then every 15s
-  runSync();
-  syncTimer = setInterval(runSync, 15_000);
+  if (syncServices.length > 0) {
+    runSync();
+    syncTimer = setInterval(runSync, 15_000);
+  }
 
   // Clear timer on app quit
   app.on('before-quit', () => {

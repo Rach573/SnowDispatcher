@@ -24,6 +24,13 @@ export async function login(username: string, password: string): Promise<AuthUse
 }
 
 export function logout(): void {
+  try {
+    if (window.api?.auth?.logout) {
+      void window.api.auth.logout();
+    }
+  } catch (e) {
+    // ignore logout propagation errors
+  }
   setCurrentUser(null);
 }
 

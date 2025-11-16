@@ -1,6 +1,7 @@
 import type { Mail } from '../../shared/types/DatabaseModels';
 import { MailRepository } from '../repositories/MailRepository';
 import { logger } from '../utils/logger';
+import type { MailSyncResult } from './types';
 
 type OutlookConfig = {
   clientId?: string;
@@ -35,7 +36,7 @@ export class OutlookSyncService {
   /**
    * Synchronise la boite et renvoie le nombre de nouveaux mails insérés.
    */
-  async sync(): Promise<number> {
+  async sync(): Promise<MailSyncResult> {
     logger.info('OutlookSyncService.sync: starting sync');
 
     // Placeholder: if no config, return mock mails or 0 based on environment
@@ -66,13 +67,14 @@ export class OutlookSyncService {
     }
 
     let inserted = 0;
+    const insertedIds: number[] = [];
     for (const f of fetched) {
       try {
         // Avoid duplicates by checking objet + date_reception
         const exists = await this.repo.findByUnique(f.objet ?? '', f.date_reception ?? '');
         if (!exists) {
           // createMail expects more fields; coerce minimal set
-          await this.repo.createMail({
+          const created = await this.repo.createMail({
             objet: f.objet ?? '(no subject)',
             contenu: f.contenu ?? null,
             date_reception: f.date_reception ?? new Date().toISOString(),
@@ -82,6 +84,7 @@ export class OutlookSyncService {
             handler_user_id: null,
           } as any);
           inserted++;
+          insertedIds.push(created.id);
         }
       } catch (e) {
         logger.error('OutlookSyncService.sync: error inserting mail', e as Error);
@@ -89,6 +92,6 @@ export class OutlookSyncService {
     }
 
     logger.info(`OutlookSyncService.sync: finished, inserted=${inserted}`);
-    return inserted;
+    return { inserted, mailIds: insertedIds };
   }
 }

@@ -1,4 +1,4 @@
-# 🎯 Résumé de la Refactorisation MailDispatcher
+﻿# 🎯 Résumé de la Refactorisation MailDispatcher
 
 ## ✅ Mission Accomplie
 
@@ -93,10 +93,18 @@ src/
 - `src/main/ipc/mail.ipc.ts` - Handlers IPC
 - `src/renderer/composables/useMail.ts` - Logique réutilisable
 - `src/renderer/App.vue` - UI améliorée
+- `src/renderer/pages/MonEspace.vue` - Tableau agents avec regroupement par priorité et édition du statut
 
 ### Utilitaires
 - `src/main/utils/logger.ts` - Logging structuré
 - `src/main/utils/errors.ts` - Classes d'erreurs custom
+
+## Gmail Sync (nouveau)
+
+- `src/main/services/GmailSyncService.ts` - Récupère les mails avec l'API Gmail (`googleapis`) et les insère en base avant de marquer les messages comme lus.
+- `src/main/index.ts` - Active Gmail Sync si les variables `GMAIL_*` sont renseignées, sinon retombe automatiquement sur le mock Outlook.
+- `.env` - Nouveau bloc de configuration OAuth (client id/secret, refresh token, label/query optionnels).
+- src/main/services/AutoAssignmentService.ts - Applique la règle d'assignation automatique et notifie les agents en temps réel.
 
 ## 🎓 Pour Aller Plus Loin
 
@@ -118,3 +126,4 @@ Le projet MailDispatcher suit maintenant **toutes les bonnes pratiques Electron*
 **Conformité** : oldzy/todos-app-electron ✅
 **Build** : Fonctionnel ✅
 **Documentation** : Complète ✅
+

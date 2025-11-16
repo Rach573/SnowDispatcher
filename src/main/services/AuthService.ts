@@ -35,19 +35,19 @@ export class AuthService {
           passwordHash: hashPassword(entry.password),
           role: entry.role,
         });
-        if ((await this.repository.count()) >= MAX_SLOTS) break;
       }
       return;
     }
 
-    // Always ensure an admin account exists
-    const admin = await this.repository.findByUsername('admin');
-    if (!admin) {
-      await this.repository.createUser({
-        username: 'admin',
-        passwordHash: hashPassword('admin'),
-        role: 'admin',
-      });
+    for (const entry of DEFAULT_USERS) {
+      const existing = await this.repository.findByUsername(entry.username);
+      if (!existing) {
+        await this.repository.createUser({
+          username: entry.username,
+          passwordHash: hashPassword(entry.password),
+          role: entry.role,
+        });
+      }
     }
   }
 

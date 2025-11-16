@@ -79,6 +79,15 @@ function goToAdmin() {
 }
 
 onMounted(async () => {
+  const user = currentUserObj.value;
+  if (!user) {
+    router.replace('/login');
+    return;
+  }
+  if (user.role !== 'admin') {
+    router.replace('/mon-espace');
+    return;
+  }
   await loadMails();
   await loadTaches();
 });
