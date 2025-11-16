@@ -53,7 +53,22 @@ export class GmailSyncService {
    * Determines whether the service has enough config to run.
    */
   isConfigured(): boolean {
-    return Boolean(this.cfg.clientId && this.cfg.clientSecret && this.cfg.redirectUri && this.cfg.refreshToken);
+    const hasClientId = Boolean(this.cfg.clientId);
+    const hasClientSecret = Boolean(this.cfg.clientSecret);
+    const hasRedirectUri = Boolean(this.cfg.redirectUri);
+    const hasRefreshToken = Boolean(this.cfg.refreshToken);
+    
+    if (!hasClientId || !hasClientSecret || !hasRedirectUri || !hasRefreshToken) {
+      logger.warn('GmailSyncService.isConfigured: Missing required configuration:', {
+        hasClientId,
+        hasClientSecret,
+        hasRedirectUri,
+        hasRefreshToken,
+      });
+      return false;
+    }
+    
+    return true;
   }
 
   /**
@@ -108,6 +123,8 @@ export class GmailSyncService {
 
   private buildClient(): gmail_v1.Gmail | null {
     try {
+      logger.info('GmailSyncService.buildClient: Creating OAuth2 client');
+      
       const oauth2Client = new google.auth.OAuth2(
         this.cfg.clientId,
         this.cfg.clientSecret,
@@ -117,6 +134,8 @@ export class GmailSyncService {
       oauth2Client.setCredentials({
         refresh_token: this.cfg.refreshToken,
       });
+      
+      logger.info('GmailSyncService.buildClient: Gmail client created successfully');
 
       return google.gmail({
         version: 'v1',
@@ -135,6 +154,13 @@ export class GmailSyncService {
           ? this.cfg.maxResults
           : 10;
 
+      logger.info('GmailSyncService.fetchMessages: Fetching messages', {
+        userEmail: this.cfg.userEmail ?? 'me',
+        labelId: this.cfg.labelId,
+        query: this.cfg.query ?? 'in:inbox is:unread',
+        maxResults,
+      });
+
       const listRes = await gmail.users.messages.list({
         userId: this.cfg.userEmail ?? 'me',
         labelIds: this.cfg.labelId ? [this.cfg.labelId] : undefined,
@@ -143,6 +169,8 @@ export class GmailSyncService {
       });
 
       const ids = listRes.data.messages ?? [];
+      logger.info(`GmailSyncService.fetchMessages: Found ${ids.length} messages`);
+      
       const messages: GmailMessage[] = [];
 
       for (const entry of ids) {
