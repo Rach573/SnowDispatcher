@@ -84,7 +84,13 @@ export class UserRepository {
       },
     });
 
-    return agents.map((agent) => ({
+    interface AgentWithTaches {
+      id: number;
+      username: string;
+      taches: { id: number }[];
+    }
+
+    return (agents as AgentWithTaches[]).map((agent): AgentWorkload => ({
       id: agent.id,
       username: agent.username,
       openTasks: agent.taches.length,

@@ -5,6 +5,7 @@ import { registerMailHandlers } from './ipc/mail.ipc';
 import { registerTacheHandlers } from './ipc/tache.ipc';
 import { registerAuthHandlers } from './ipc/auth.ipc';
 import { MailRepository } from './repositories/MailRepository';
+import { getSessionUser } from './utils/session';
 import { GmailSyncService } from './services/GmailSyncService';
 import { AutoAssignmentService } from './services/AutoAssignmentService';
 import type { MailSyncResult } from './services/types';
@@ -155,6 +156,26 @@ app.whenReady().then(() => {
           w.webContents.send('tache:assigned', { assignments });
         } catch (e) {
           console.warn('Failed to send tache:assigned to a window', e);
+        }
+      }
+    }
+
+    // Send incoming mail notifications to renderers.
+    if (newMailIds.length > 0) {
+      for (const mailId of newMailIds) {
+        try {
+          const mail = await mailRepo.findById(mailId);
+          if (!mail) continue;
+          // Broadcast mail:incoming to all windows; renderer will filter by current user role/id
+          for (const w of BrowserWindow.getAllWindows()) {
+            try {
+              w.webContents.send('mail:incoming', { mail });
+            } catch (e) {
+              console.warn('Failed to send mail:incoming to a window', e);
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to fetch mail for notification', mailId, e);
         }
       }
     }

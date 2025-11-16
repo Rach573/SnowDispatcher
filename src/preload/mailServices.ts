@@ -59,6 +59,18 @@ export const mailServices = {
       ipcRenderer.removeListener('mail:updated', listener);
     };
   },
+
+  /**
+   * Subscribe to incoming mail notifications emitted by the main process.
+   * Callback receives payload: { mail }
+   */
+  onIncoming: (cb: (payload: any) => void) => {
+    const listener = (_ev: any, payload: any) => cb(payload);
+    ipcRenderer.on('mail:incoming', listener);
+    return () => {
+      ipcRenderer.removeListener('mail:incoming', listener);
+    };
+  },
 };
 
 export type MailServices = typeof mailServices;

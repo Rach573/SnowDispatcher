@@ -25,6 +25,12 @@
         </div>
       </section>
 
+      <div class="actions">
+        <button v-if="canResolve" class="btn primary" @click="markResolved" :disabled="resolving">
+          ✅ Marquer comme Résolu
+        </button>
+      </div>
+
       <section class="content">
         <h3>Contenu</h3>
         <pre>{{ mail.contenu ?? '—' }}</pre>
@@ -34,9 +40,10 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useMailDetail } from '../composables/useMailDetail';
+import { getCurrentUser } from '../utils/auth';
 
 const route = useRoute();
 const router = useRouter();
@@ -45,7 +52,9 @@ const { mail, loading, error, loadMail } = useMailDetail();
 const mailId = Number(route.params.id);
 
 onMounted(() => {
-  void loadMail(mailId);
+  void loadMail(mailId).then(() => {
+    void findRelatedTache();
+  });
 });
 
 const goBack = () => {
@@ -60,6 +69,51 @@ const formatDate = (dateStr: string | null | undefined) => {
   if (!dateStr) return '-';
   return new Date(dateStr).toLocaleString();
 };
+
+const canResolve = ref(false);
+const resolving = ref(false);
+let relatedTacheId: number | null = null;
+
+async function findRelatedTache() {
+  try {
+    if (!mail.value) return;
+    const current = getCurrentUser();
+    let taches: any[] = [];
+    if (current?.role === 'admin') {
+      taches = await window.api.tache.getAllTaches();
+    } else {
+      taches = await window.api.tache.getTachesForAgent({ agentUserId: current?.id ?? null, agentUsername: current?.username ?? null });
+    }
+
+    const found = taches.find((t: any) => Number(t.mail_id) === Number(mail.value?.id));
+    if (found) {
+      relatedTacheId = found.id;
+      canResolve.value = (found.statut_tache !== 'Resolu');
+    } else {
+      relatedTacheId = null;
+      canResolve.value = false;
+    }
+  } catch (e) {
+    // ignore
+    canResolve.value = false;
+    relatedTacheId = null;
+  }
+}
+
+async function markResolved() {
+  if (!relatedTacheId) return;
+  resolving.value = true;
+  try {
+    await window.api.tache.updateStatut(relatedTacheId, 'Resolu');
+    // navigate back to kanban (dashboard)
+    router.push('/');
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('Failed to mark resolved', e);
+  } finally {
+    resolving.value = false;
+  }
+}
 </script>
 
 <style scoped>
