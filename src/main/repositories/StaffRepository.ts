@@ -14,10 +14,7 @@ export class StaffRepository {
     if (!normalized) return null;
     const staff = await prisma.staff.findFirst({
       where: {
-        adresse_mail: {
-          equals: normalized,
-          mode: 'insensitive',
-        },
+        adresse_mail: normalized,
       },
     });
     return staff as unknown as Staff | null;
