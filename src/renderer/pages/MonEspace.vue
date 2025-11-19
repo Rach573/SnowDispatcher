@@ -37,55 +37,61 @@
       </ul>
     </section>
 
-    <section v-if="!loading && currentUser" class="priority-board">
+    <section v-if="!loading && currentUser" class="status-stats">
       <div class="board-head">
         <div>
-          <h3>Mails par priorité</h3>
-          <p class="board-subtitle">Classés par ordre d'arrivée (plus récent en premier)</p>
+          <h3>Statistiques par statut</h3>
+          <p class="board-subtitle">Répartition des tickets par état (En attente / En cours / Traité)</p>
         </div>
-        <span class="chip">{{ totalMailsLabel }}</span>
+        <span class="chip">{{ totalTachesLabel }}</span>
       </div>
-      <div class="priority-columns">
-        <div class="priority-column" v-for="section in prioritySections" :key="section.key">
-          <header class="column-header">
-            <div>
-              <h4>{{ section.title }}</h4>
-              <p class="column-description">{{ section.description }}</p>
-            </div>
-            <span class="chip">{{ section.taches.length }} mail{{ section.taches.length > 1 ? 's' : '' }}</span>
-          </header>
-          <div v-if="section.taches.length === 0" class="empty-column">
-            Aucun mail pour cette priorité.
-          </div>
-          <article v-for="t in section.taches" :key="t.id" class="priority-card">
-            <div class="card-meta">
-              <div>
-                <p class="sender-name">{{ senderName(t) }}</p>
-                <p class="sender-email">{{ senderEmail(t) }}</p>
-              </div>
-              <span class="arrival">{{ formatDate(getMailDate(t)) }}</span>
-            </div>
-            <div class="mail-preview">
-              <h5>{{ mailSubject(t) }}</h5>
-              <p>{{ mailSnippet(t) }}</p>
-            </div>
-            <div class="status-row">
-              <label>Statut</label>
-              <select
-                :value="statutByTache[t.id]"
-                :disabled="updatingStatut[t.id]"
-                @change="onStatutChange(t.id, ($event.target as HTMLSelectElement).value as MailStatut)"
-              >
-                <option v-for="option in statutOptions" :key="option.value" :value="option.value">
-                  {{ option.label }}
-                </option>
-              </select>
-            </div>
-            <button class="detail-link" @click="openMailDetail(t.mail_id)">Voir le mail complet</button>
-          </article>
+
+      <div class="status-cards">
+        <div class="status-card card">
+          <h4>En attente</h4>
+          <p class="stat-count">{{ statusCounts['Nouveau'] || 0 }}</p>
+        </div>
+        <div class="status-card card">
+          <h4>En cours</h4>
+          <p class="stat-count">{{ statusCounts['Assigne'] || 0 }}</p>
+        </div>
+        <div class="status-card card">
+          <h4>Traité</h4>
+          <p class="stat-count">{{ statusCounts['Resolu'] || 0 }}</p>
         </div>
       </div>
-      <p v-if="boardError" class="error board-error">{{ boardError }}</p>
+
+      <div class="status-tables">
+        <h4>Détails par statut</h4>
+        <div class="table-wrap">
+          <table class="stats-table">
+            <thead>
+              <tr>
+                <th>Statut</th>
+                <th>Nombre</th>
+                <th>Dernier attribué</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>En attente</td>
+                <td>{{ statusCounts['Nouveau'] || 0 }}</td>
+                <td>{{ lastByStatus['Nouveau'] ?? '-' }}</td>
+              </tr>
+              <tr>
+                <td>En cours</td>
+                <td>{{ statusCounts['Assigne'] || 0 }}</td>
+                <td>{{ lastByStatus['Assigne'] ?? '-' }}</td>
+              </tr>
+              <tr>
+                <td>Traité</td>
+                <td>{{ statusCounts['Resolu'] || 0 }}</td>
+                <td>{{ lastByStatus['Resolu'] ?? '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
 
     <div v-if="loading" class="loading">Chargement...</div>
@@ -209,6 +215,29 @@ const sortedTaches = computed(() => {
     if (pb !== pa) return pb - pa;
     return getMailTimestamp(b) - getMailTimestamp(a);
   });
+});
+
+const totalTachesLabel = computed(() => {
+  const count = taches.value.length;
+  return `${count} tâche${count > 1 ? 's' : ''}`;
+});
+
+const statusCounts = computed(() => {
+  const map: Record<string, number> = { Nouveau: 0, Assigne: 0, Resolu: 0 };
+  for (const t of taches.value) {
+    const s = t.statut_tache || 'Nouveau';
+    map[s] = (map[s] || 0) + 1;
+  }
+  return map;
+});
+
+const lastByStatus = computed(() => {
+  const map: Record<string, string | null> = { Nouveau: null, Assigne: null, Resolu: null };
+  for (const s of Object.keys(map)) {
+    const list = taches.value.filter((t) => (t.statut_tache || 'Nouveau') === s).sort((a, b) => getMailTimestamp(b) - getMailTimestamp(a));
+    map[s] = list.length ? formatDate(getMailDate(list[0])) : null;
+  }
+  return map;
 });
 
 const recentHistory = computed(() => sortedTaches.value.slice(0, 5));
@@ -395,6 +424,14 @@ function openMailDetail(mailId: number) {
   padding: 1.5rem;
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
 }
+
+.status-stats { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+.status-cards { display:flex; gap:12px; margin-bottom:12px; }
+.status-card { flex:1; padding:12px; text-align:center; }
+.stat-count { font-size:24px; font-weight:700; margin-top:6px; }
+.stats-table { width:100%; border-collapse: collapse; }
+.stats-table th, .stats-table td { padding:8px 10px; border:1px solid #e6eef6; }
+.status-tables .table-wrap { margin-top:12px; }
 
 .board-head {
   display: flex;
