@@ -9,7 +9,7 @@
           <li>
             <RouterLink to="/">Tableau de bord</RouterLink>
           </li>
-          <li v-if="currentRole === 'admin'">
+          <li v-if="isAdmin">
             <RouterLink to="/admin">Supervision</RouterLink>
           </li>
           <li v-else>
@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref } from 'vue';
+import { onMounted, onBeforeUnmount, ref, computed } from 'vue';
 import NotificationToasts, { type NotificationToast } from './components/NotificationToasts.vue';
 import { getCurrentUser, logout } from './utils/auth';
 import type { AssignmentNotification } from '../shared/types/Events';
@@ -59,6 +59,11 @@ const notifications = ref<NotificationToast[]>([]);
 const dismissTimers = new Map<string, number>();
 let unsubscribeAssignments: (() => void) | null = null;
 const isAdmin = (() => getCurrentUser()?.role === 'admin')();
+
+const getUserName = computed(() => {
+  const u = getCurrentUser();
+  return u?.username ?? '';
+});
 
 function pushNotification(payload: AssignmentNotification) {
   const id = `${payload.tacheId}-${Date.now()}`;
