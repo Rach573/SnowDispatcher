@@ -71,10 +71,32 @@ body {
 
 .app-sidebar {
   grid-area: sidebar;
-  background: linear-gradient(180deg, var(--color-surface), var(--color-surface));
-  border-right: 1px solid var(--color-border);
+  background: linear-gradient(180deg, var(--color-primary), var(--color-primary-600));
+  color: white;
+  border-right: 1px solid rgba(255,255,255,0.06);
   padding: var(--space-lg) var(--space-md);
 }
+
+.app-sidebar .logo {
+  font-size: 18px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.95);
+}
+
+.logo-brand {
+  color: #fff;
+  display:inline-block;
+  background: linear-gradient(90deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06));
+  padding: 2px 8px;
+  border-radius: 8px;
+  margin-right: 6px;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.12);
+  transform: translateY(-2px) scale(1.05);
+}
+
+.app-sidebar .side-nav { margin-top: 18px; }
+.app-sidebar .side-nav a { color: rgba(255,255,255,0.92); text-decoration:none; display:block; padding:8px 6px; border-radius:6px; }
+.app-sidebar .side-nav a.router-link-active { background: rgba(255,255,255,0.06); }
 
 .app-main {
   grid-area: main;

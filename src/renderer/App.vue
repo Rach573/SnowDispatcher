@@ -2,7 +2,7 @@
   <div class="app-shell">
     <aside class="app-sidebar">
       <div class="logo" aria-hidden>
-        <strong style="color:var(--color-primary);">Snow</strong>Dispatcher
+        <strong class="logo-brand">Snow</strong>Dispatcher
       </div>
       <nav class="side-nav">
         <ul>

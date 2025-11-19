@@ -1,13 +1,13 @@
 <template>
-  <div class="priority-card ticket-card card" :class="priorityClass">
+  <div class="priority-card ticket-card card" :class="priorityClass" @click="openMail">
     <div class="ticket-top">
       <div class="priority-badge" :title="priority">{{ priorityLabel }}</div>
-      <div class="title">{{ ticket.objet }}</div>
+      <div class="title">{{ mailTitle }}</div>
     </div>
     <div class="ticket-meta">
       <div class="avatar" v-if="agentInitials">{{ agentInitials }}</div>
       <div class="meta-text">
-        <div class="mail-from">{{ displayFrom }}</div>
+        <div class="mail-from" v-if="displayFrom">{{ displayFrom }}</div>
         <div class="date">{{ formattedDate }}</div>
       </div>
     </div>
@@ -16,6 +16,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 import type { Mail } from '../../shared/types/DatabaseModels';
 import { format } from 'date-fns';
 
@@ -23,7 +24,8 @@ const props = defineProps<{ ticket: Mail }>();
 
 const ticket = props.ticket;
 
-const priority = (ticket as any).priority || 'Normale';
+const mail = (ticket as any).mail ?? (ticket as any);
+const priority = (ticket as any).priority || mail?.priorite_calculee || 'Normale';
 
 const priorityClass = computed(() => {
   if (priority === 'Alerte Rouge') return 'prio-red';
@@ -34,21 +36,35 @@ const priorityClass = computed(() => {
 const priorityLabel = computed(() => priority);
 
 const agentInitials = computed(() => {
-  const name = (ticket as any).agentName || (ticket as any).handler_user_name || null;
+  const name = (ticket as any).agentName || (ticket as any).handler_user_name || (ticket as any).agent_username || null;
   if (!name) return null;
-  const parts = name.split(' ').filter(Boolean);
-  const initials = parts.map(p => p[0].toUpperCase()).slice(0,2).join('');
+  const parts = String(name).split(' ').filter(Boolean) as string[];
+  const initials = parts.map((p: string) => p[0].toUpperCase()).slice(0,2).join('');
   return initials;
 });
 
 const displayFrom = computed(() => {
-  if (ticket.expediteur && (ticket.expediteur as any).nom_complet) return (ticket.expediteur as any).nom_complet;
-  if (ticket.expediteur && (ticket.expediteur as any).adresse_mail) return (ticket.expediteur as any).adresse_mail;
-  return 'Expéditeur inconnu';
+  // ticket may be a tache with embedded mail
+  const mail = (ticket as any).mail ?? ticket;
+  if (!mail) return '';
+  if (mail.expediteur && (mail.expediteur as any).nom_complet) return (mail.expediteur as any).nom_complet;
+  if (mail.expediteur && (mail.expediteur as any).adresse_mail) return (mail.expediteur as any).adresse_mail;
+  return '';
 });
 
+const router = useRouter();
+
+function openMail() {
+  const mail = (ticket as any).mail ?? (ticket as any);
+  const mailId = mail?.id ?? mail?.mail_id ?? null;
+  if (!mailId) return;
+  router.push(`/mails/${mailId}`);
+}
+
+const mailTitle = computed(() => mail?.objet ?? '');
+
 const formattedDate = computed(() => {
-  try { return format(new Date(ticket.date_reception), 'Pp'); } catch (e) { return '' }
+  try { return format(new Date(mail?.date_reception ?? (ticket as any).date_reception), 'Pp'); } catch (e) { return '' }
 });
 </script>
 
