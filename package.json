@@ -17,7 +17,9 @@
     "prisma:push": "prisma db push --schema=./src/main/repositories/prisma/schema.prisma",
     "prisma:studio": "prisma studio --schema=./src/main/repositories/prisma/schema.prisma",
     "seed:mail": "node ./scripts/seed-prisma-mail.js",
-    "reset:admin": "node ./scripts/reset-admin-password.js"
+    "reset:admin": "node ./scripts/reset-admin-password.js",
+    "setup:gmail": "node ./scripts/setup-gmail-oauth.js",
+    "test:gmail": "node ./scripts/test-gmail-connection.js"
   },
   "keywords": [],
   "author": {
