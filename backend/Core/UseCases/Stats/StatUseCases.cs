@@ -60,7 +60,7 @@ public class StatUseCases : IStatsUseCases
                 m.AgentUserId.HasValue)
             .Select(m => new
             {
-                HasChildren = agents.Any(a => a.UserId == m.AgentUserId.Value && a.NombreEnfants > 0)
+                HasChildren = agents.Any(a => a.UserId == m.AgentUserId.GetValueOrDefault() && a.NombreEnfants > 0)
             })
             .GroupBy(x => x.HasChildren ? "Avec enfants" : "Sans enfants")
             .Select(g => new Stat
