@@ -20,7 +20,18 @@ export class AdminPanelComponent implements OnInit {
     .length;
   });
   remainingMails = computed(() => {
-    return this.mailAssignments().length - this.treatedMails();
+    return this.totalMails() - this.treatedMails();
+  });
+  treatedPercentage = computed(() => {
+  const total = this.totalMails();
+
+  if (total === 0) {
+    return 0;
+  }
+
+  return Math.round(
+    (this.treatedMails() / total) * 100
+  );
   });
   agents: any[] = [];
   selectedAgent: any = null;
