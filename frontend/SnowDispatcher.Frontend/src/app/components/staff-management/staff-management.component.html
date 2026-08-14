@@ -1,0 +1,36 @@
+<div class="staff-container">
+  <nav class="navbar">
+    <div class="navbar-brand">SnowDispatcher</div>
+    <div class="navbar-menu">
+      <a href="#" (click)="navigateToDashboard()" class="nav-link">Mails</a>
+      <a *ngIf="currentUser?.role === 'admin'" href="#" (click)="navigateToAdmin()" class="nav-link admin-link">Admin</a>
+      <a href="#" (click)="logout()" class="nav-link">Déconnexion</a>
+    </div>
+  </nav>
+
+  <div class="content">
+    <h1>Staff de traitement</h1>
+    
+    <div *ngIf="loading" class="loading">
+      <p>Chargement du staff...</p>
+    </div>
+
+    <div *ngIf="!loading" class="staff-sections">
+      <div *ngFor="let hierarchy of ['Leader', 'N+1', 'Employé Lambda']" class="hierarchy-section">
+        <h2>{{ hierarchy }}</h2>
+        <div class="staff-list">
+          <div *ngIf="groupedStaff[hierarchy]?.length === 0" class="no-data">
+            <p>Aucun membre du staff {{ hierarchy }}</p>
+          </div>
+          <div *ngFor="let staffMember of groupedStaff[hierarchy]" class="staff-card">
+            <div class="staff-info">
+              <h3>{{ staffMember.nomComplet }}</h3>
+              <p class="email">{{ staffMember.adresseMail }}</p>
+              <span class="hierarchy-badge">{{ hierarchy }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

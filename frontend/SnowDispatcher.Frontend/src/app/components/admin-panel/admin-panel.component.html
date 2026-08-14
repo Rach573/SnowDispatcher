@@ -1,0 +1,273 @@
+<div class="admin-container">
+  <nav class="navbar">
+    <div class="navbar-brand">SnowDispatcher - Admin</div>
+    <div class="navbar-menu">
+      <button type="button" (click)="logout()" class="nav-link">Deconnexion</button>
+    </div>
+  </nav>
+
+  <main class="content">
+    <h1>Espace admin</h1>
+
+    <div class="tabs">
+      <button
+        [class.active]="activeTab === 'assignments'"
+        (click)="setActiveTab('assignments')"
+        class="tab-btn">
+        Mails et attributions
+      </button>
+      <button
+        [class.active]="activeTab === 'agents'"
+        (click)="setActiveTab('agents')"
+        class="tab-btn">
+        Agents
+      </button>
+      <button
+        [class.active]="activeTab === 'stats'"
+        (click)="setActiveTab('stats')"
+        class="tab-btn">
+        Statistiques
+      </button>
+    </div>
+
+    <section *ngIf="activeTab === 'stats'" class="stats-section tab-content">
+      <div class="tab-header">
+        <div>
+          <h2>Statistiques des mails</h2>
+          <p>Consulte les statistiques calculées depuis les mails existants.</p>
+        </div>
+      </div>
+
+      <div class="stats-tabs">
+        <button
+          type="button"
+          class="tab-btn"
+          (click)="loadMailStatsByPriority()"
+          [class.active]="selectedStatView === 'priority'">
+          Par priorité
+        </button>
+
+        <button
+          type="button"
+          class="tab-btn"
+          (click)="loadMailStatsByStatus()"
+          [class.active]="selectedStatView === 'status'">
+          Par statut
+        </button>
+        <button
+          type="button"
+          class="tab-btn"
+          (click)="loadMailStatsByChildren()"
+          [class.active]="selectedStatView === 'children'">
+          Par nombre d'enfants
+        </button> 
+      </div>
+
+      <div *ngIf="loadingStats" class="loading">
+        <p>Chargement des statistiques...</p>
+      </div>
+
+      <div *ngIf="!loadingStats && statsError" class="no-data">
+        <p>{{ statsError }}</p>
+        <button type="button" class="btn btn-secondary" (click)="retryStats()">Réessayer</button>
+      </div>
+
+      <div *ngIf="!loadingStats && !statsError && stats.length === 0" class="no-data">
+        <p>Aucune statistique disponible.</p>
+      </div>
+
+      <div *ngIf="!loadingStats && !statsError && stats.length > 0" class="stats-table-card">
+        <div class="stats-table-header">
+          <h3>Répartition des mails</h3>
+          <span class="stats-table-caption">{{ statsTotal }} mail(s) au total</span>
+        </div>
+
+        <table class="stats-table">
+          <thead>
+            <tr>
+              <th>Catégorie</th>
+              <th>Nombre</th>
+              <th>Proportion</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let stat of stats">
+              <td>{{ stat.label }}</td>
+              <td>{{ stat.count }}</td>
+              <td>{{ getStatPercentage(stat.count) }} %</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section *ngIf="activeTab === 'assignments'" class="tab-content">
+      <div class="tab-header">
+        <div>
+          <h2>Attribution des mails</h2>
+          <p>{{ totalMails() }} mail(s) au total</p>
+          <p>Les mails sont affiches du plus ancien au plus recent.</p>
+        </div>
+        <button class="btn btn-secondary" (click)="loadAssignments()">Rafraichir</button>
+      </div>
+
+      <div class="assignment-toolbar">
+        <div class="stat-card urgent">
+          <span>{{ unassignedMails.length }}</span>
+          <strong>Non attribues</strong>
+        </div>
+        <div class="stat-card">
+          <span>{{ assignedMails.length }}</span>
+          <strong>Attribues</strong>
+        </div>
+        <div class="stat-card">
+          <span>{{ agents.length }}</span>
+          <strong>Agents</strong>
+        </div>
+
+        <div class="filters">
+          <button type="button" [class.active]="assignmentFilter === 'todo'" (click)="assignmentFilter = 'todo'">
+            A traiter
+          </button>
+          <button type="button" [class.active]="assignmentFilter === 'all'" (click)="assignmentFilter = 'all'">
+            Tous
+          </button>
+          <button type="button" [class.active]="assignmentFilter === 'assigned'" (click)="assignmentFilter = 'assigned'">
+            Attribues
+          </button>
+        </div>
+
+        <input
+          type="search"
+          [(ngModel)]="mailSearchTerm"
+          class="search-input"
+          placeholder="Rechercher un mail, expediteur ou agent"
+        />
+      </div>
+
+      <div *ngIf="loadingAssignments" class="loading">
+        <p>Chargement des mails...</p>
+      </div>
+
+      <div *ngIf="!loadingAssignments && visibleMails.length === 0" class="no-data">
+        <p>Aucun mail ne correspond a ce filtre.</p>
+      </div>
+
+      <div *ngIf="!loadingAssignments && visibleMails.length > 0" class="mail-list">
+        <article *ngFor="let mail of visibleMails" class="mail-card" [class.unassigned]="!mail.agentUserId">
+          <div class="mail-main">
+            <div class="mail-title-row">
+              <h3>{{ mail.subject }}</h3>
+              <span class="badge" [class.badge-empty]="!mail.agentUserId">
+                {{ mail.agentUserId ? 'Attribue' : 'Non attribue' }}
+              </span>
+            </div>
+            <p class="meta">
+              De {{ mail.senderName || mail.senderEmail || 'expediteur inconnu' }}
+              - {{ mail.receivedAt | date:'dd/MM/yyyy HH:mm' }}
+            </p>
+            <p class="body">{{ mail.body }}</p>
+            <p class="assignment">
+              Actuel: <strong>{{ mail.agentName || mail.agentUsername || 'aucun agent' }}</strong>
+            </p>
+          </div>
+
+          <div class="assign-control" [class.saving]="assigningMailId === mail.mailId">
+            <label>{{ mail.agentUserId ? 'Reattribuer' : 'Attribuer maintenant' }}</label>
+            <select
+              [disabled]="assigningMailId === mail.mailId"
+              [value]="mail.agentUserId || ''"
+              (change)="assignMail(mail.mailId, $any($event.target).value)">
+              <option value="">Aucun agent</option>
+              <option *ngFor="let agent of sortedAgents" [value]="agent.userId">
+                {{ getAgentLabel(agent) }}
+              </option>
+            </select>
+            <small *ngIf="assigningMailId === mail.mailId">Enregistrement...</small>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section *ngIf="activeTab === 'agents'" class="tab-content">
+      <div class="tab-header">
+        <div>
+          <h2>Agents disponibles</h2>
+          <p>{{ agents.length }} agent(s) utilisateur(s)</p>
+        </div>
+        <button class="btn btn-secondary" (click)="loadAgents()">Rafraichir</button>
+        <button class="btn btn-primary" (click)="addAgent()">Ajouter un agent</button>
+      </div>
+
+      <div *ngIf="loadingAgents" class="loading">
+        <p>Chargement des agents...</p>
+      </div>
+
+      <div *ngIf="!loadingAgents && agents.length === 0" class="no-data">
+        <p>Aucun utilisateur agent disponible</p>
+      </div>
+
+      <div *ngIf="!loadingAgents" class="agent-layout">
+        <div class="agents-grid">
+          <article
+            *ngFor="let agent of agents"
+            class="agent-admin-card"
+            [class.selected]="selectedAgent?.userId === agent.userId"
+            (click)="selectAgent(agent)">
+            <div class="agent-info">
+              <h3>{{ agent.nomComplet || agent.username }}</h3>
+              <p class="email">{{ agent.adresseMail || agent.username }}</p>
+              <p class="status">{{ agent.statutHierarchique }}</p>
+              <p>{{ agent.activeMailCount }} mail(s) traite(s)</p>
+            </div>
+            <div class="agent-actions" (click)="$event.stopPropagation()">
+              <button class="btn btn-secondary" (click)="updatePassword(agent)">
+                Mot de passe
+              </button>
+              <button class="btn btn-danger" (click)="deleteAgent(agent)">
+                Supprimer
+              </button>
+            </div>
+          </article>
+        </div>
+
+        <aside class="agent-detail">
+          <div *ngIf="!selectedAgent" class="no-data">
+            <p>Clique sur un agent pour voir ses mails.</p>
+          </div>
+
+          <div *ngIf="selectedAgent">
+            <h2>{{ selectedAgent.nomComplet || selectedAgent.username }}</h2>
+            <p class="meta">{{ selectedAgent.adresseMail || selectedAgent.username }}</p>
+
+            <div *ngIf="loadingAgentMails" class="loading compact">
+              <p>Chargement...</p>
+            </div>
+
+            <div *ngIf="!loadingAgentMails && selectedAgentMails.length === 0" class="no-data compact">
+              <p>Aucun mail attribue a cet agent.</p>
+            </div>
+
+            <article *ngFor="let mail of selectedAgentMails" class="mail-card detail-card">
+              <h3>{{ mail.subject }}</h3>
+              <p class="meta">{{ mail.receivedAt | date:'dd/MM/yyyy HH:mm' }}</p>
+              <p class="body">{{ mail.body }}</p>
+              <div class="assign-control">
+                <label>Reattribuer</label>
+                <select
+                  [value]="mail.agentUserId || ''"
+                  (change)="assignMail(mail.mailId, $any($event.target).value)">
+                  <option value="">Aucun agent</option>
+                  <option *ngFor="let agent of agents" [value]="agent.userId">
+                    {{ agent.nomComplet || agent.username }}
+                  </option>
+                </select>
+              </div>
+            </article>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+</div>

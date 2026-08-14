@@ -1,0 +1,6 @@
+@SnowDispatcher.Api_HostAddress = http://localhost:5102
+
+GET {{SnowDispatcher.Api_HostAddress}}/api/dispatch/priorite?statutHierarchique=Leader
+Accept: application/json
+
+###

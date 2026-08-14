@@ -1,0 +1,50 @@
+<div class="dashboard-container">
+  <nav class="navbar">
+    <div class="navbar-brand">SnowDispatcher</div>
+    <div class="navbar-menu">
+      <span class="user-label">{{ currentUser?.username }}</span>
+      <button type="button" (click)="logout()" class="nav-link">Deconnexion</button>
+    </div>
+  </nav>
+
+  <main class="content">
+    <div class="page-header">
+      <div>
+        <h1>Mes mails attribues</h1>
+        <p>{{ pendingMails.length }} mail(s) a traiter, {{ mails.length }} mail(s) attribue(s)</p>
+      </div>
+      <button type="button" class="btn btn-secondary" (click)="loadMails()">Rafraichir</button>
+    </div>
+
+    <div *ngIf="loading" class="loading">
+      <p>Chargement des mails attribues...</p>
+    </div>
+
+    <div *ngIf="!loading && mails.length === 0" class="no-data">
+      <p>Aucun mail ne t'est attribue.</p>
+    </div>
+
+    <div *ngIf="!loading && mails.length > 0" class="mails-list">
+      <article *ngFor="let mail of mails" class="mail-card" [class.done]="mail.status === 'Résolu'">
+        <div class="mail-header">
+          <div>
+            <h2>{{ mail.subject }}</h2>
+            <p>De {{ mail.senderName || mail.senderEmail || 'expediteur inconnu' }} - {{ mail.receivedAt | date:'dd/MM/yyyy HH:mm' }}</p>
+          </div>
+          <span class="status-badge">{{ mail.status }}</span>
+        </div>
+
+        <p class="body">{{ mail.body }}</p>
+
+        <button
+          *ngIf="mail.status !== 'Résolu'"
+          type="button"
+          class="btn btn-primary"
+          [disabled]="updatingTaskId === mail.taskId"
+          (click)="markAsTreated(mail)">
+          {{ updatingTaskId === mail.taskId ? 'Mise a jour...' : 'Marquer comme traite' }}
+        </button>
+      </article>
+    </div>
+  </main>
+</div>

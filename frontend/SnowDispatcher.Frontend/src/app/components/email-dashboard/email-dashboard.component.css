@@ -1,0 +1,152 @@
+.dashboard-container {
+  min-height: 100vh;
+  background: #f6f7fb;
+}
+
+.navbar {
+  background: #333;
+  color: white;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-brand {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.navbar-menu {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+.user-label {
+  color: #ddd;
+}
+
+.nav-link {
+  background: none;
+  border: 0;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+
+.content {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 30px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  color: #2f3542;
+  margin: 0 0 6px 0;
+}
+
+.page-header p,
+.mail-header p,
+.body {
+  color: #667085;
+}
+
+.loading,
+.no-data,
+.mail-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.loading,
+.no-data {
+  padding: 36px;
+  text-align: center;
+}
+
+.mails-list {
+  display: grid;
+  gap: 16px;
+}
+
+.mail-card {
+  border-left: 5px solid #d32f2f;
+  padding: 18px;
+}
+
+.mail-card.done {
+  border-left-color: #51cf66;
+  opacity: 0.75;
+}
+
+.mail-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.mail-header h2 {
+  color: #2f3542;
+  margin: 0;
+}
+
+.body {
+  line-height: 1.45;
+}
+
+.status-badge {
+  align-self: flex-start;
+  background: #667eea;
+  border-radius: 999px;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
+.btn {
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 10px 14px;
+}
+
+.btn-primary {
+  background: #d32f2f;
+  color: white;
+}
+
+.btn-secondary {
+  background: #667eea;
+  color: white;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+@media (max-width: 720px) {
+  .navbar,
+  .page-header,
+  .mail-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .content {
+    padding: 18px;
+  }
+}

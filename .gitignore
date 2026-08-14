@@ -1,0 +1,22 @@
+# .NET
+**/bin/
+**/obj/
+.vs/
+
+# Angular / Node
+**/node_modules/
+**/dist/
+.angular/
+
+# Fichiers temporaires
+tmp/
+*.log
+tmp-*.png
+
+# IDE
+.vscode/
+.idea/
+
+# Système
+Thumbs.db
+.DS_Store
