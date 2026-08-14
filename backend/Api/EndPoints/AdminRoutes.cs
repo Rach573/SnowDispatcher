@@ -60,7 +60,7 @@ public static class AdminRoutes
         
             var passwordHash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(request.Password))).ToLowerInvariant();
 
-            var id = await useCases.AddAgentAsync(request.Username.Trim(), request.StaffId, passwordHash);
+            var id = await useCases.AddAgentAsync(request.Username.Trim(), request.StaffId, passwordHash, request.NombreEnfants);
 
             return Results.Created($"/api/admin/agents/{id}", new { id });
         });

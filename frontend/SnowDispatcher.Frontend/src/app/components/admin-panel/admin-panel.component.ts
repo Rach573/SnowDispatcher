@@ -214,7 +214,10 @@ export class AdminPanelComponent implements OnInit {
     const staffIdInput = prompt(`ID du staff pour ${username} (laisser vide si aucun)`);
     const staffId = staffIdInput ? Number(staffIdInput) : null;
 
-    this.adminService.addAgent(username, password, staffId).subscribe(
+    const nombreEnfantsInput = prompt(`Nombre d enfants pour ${username} (laisser vide si aucun)`);
+    const nombreEnfants = nombreEnfantsInput ? Number(nombreEnfantsInput) : 0;
+
+    this.adminService.addAgent(username, password, staffId, nombreEnfants).subscribe(
       () => {
         alert('Agent ajouté');
         this.loadAgents();

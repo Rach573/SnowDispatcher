@@ -38,8 +38,8 @@ export class AdminService {
     return this.http.delete<any>(`${this.apiUrl}/agents/${agentUserId}`, { headers: this.authService.getAuthHeaders() });
   }
 
-  addAgent(username: string, password: string, staffId: number | null): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/agents`, { username, password, staffId }, { headers: this.authService.getAuthHeaders() });
+  addAgent(username: string, password: string, staffId: number | null, nombreEnfants: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/agents`, { username, password, staffId, nombreEnfants }, { headers: this.authService.getAuthHeaders() });
   }
 
   getMailStatsByPriority(): Observable<Stat[]> {

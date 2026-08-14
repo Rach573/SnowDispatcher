@@ -62,15 +62,15 @@ public class UserRepository : IUserRepository
         return await connection.QueryAsync<AdminAgentDbModel>(sql);
     }
 
-    public async Task<int> AddAgentAsync(string username, int? staffId,string passwordHash)
+    public async Task<int> AddAgentAsync(string username, int? staffId,string passwordHash, int nombreEnfants)
     {
         const string sql = @"
-            INSERT INTO users (username, staff_id, password_hash, role)
-            VALUES (@username, @staffId, @passwordHash, 'agent');
+            INSERT INTO users (username, staff_id, password_hash, nombreEnfants, role)
+            VALUES (@username, @staffId, @passwordHash, @nombreEnfants, 'agent');
             SELECT LAST_INSERT_ID();";
 
         using var connection = _connectionFactory.CreateConnection();
-        return await connection.QuerySingleAsync<int>(sql, new { username, staffId, passwordHash });
+        return await connection.QuerySingleAsync<int>(sql, new { username, staffId, passwordHash, nombreEnfants });
     }
 
     public async Task DeleteAgentAsync(int userId)

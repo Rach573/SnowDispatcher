@@ -38,8 +38,8 @@ public class AdminUseCases : IAdminUseCases
         return _userGateway.DeleteAgentAsync(userId);
     }
 
-    public Task<int> AddAgentAsync(string username, int? staffId, string passwordHash)
+    public Task<int> AddAgentAsync(string username, int? staffId, string passwordHash, int nombreEnfants)
     {
-        return _userGateway.AddAgentAsync(username, staffId, passwordHash);
+        return _userGateway.AddAgentAsync(username, staffId, passwordHash, nombreEnfants);
     }
 }

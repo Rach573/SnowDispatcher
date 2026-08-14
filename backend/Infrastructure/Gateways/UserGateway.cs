@@ -46,8 +46,8 @@ public class UserGateway : IUserGateway
         return _userRepository.DeleteAgentAsync(userId);
     }
 
-    public Task<int> AddAgentAsync(string username, int? staffId, string passwordHash)
+    public Task<int> AddAgentAsync(string username, int? staffId, string passwordHash, int nombreEnfants)
     {
-        return _userRepository.AddAgentAsync(username, staffId, passwordHash);
+        return _userRepository.AddAgentAsync(username, staffId, passwordHash, nombreEnfants); 
     }
 }
