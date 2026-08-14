@@ -4,7 +4,7 @@ namespace SnowDispatcher.Core.UseCases.Admin;
 
 public interface IAdminUseCases
 {
-    Task<IEnumerable<AdminAgent>> GetAgentsAsync();
+    Task<IEnumerable<AgentDashboardInfo>> GetAgentsAsync();
     Task<IEnumerable<AdminMailAssignment>> GetMailAssignmentsAsync();
     Task<IEnumerable<AdminMailAssignment>> GetMailsForAgentAsync(int agentUserId);
     Task DeleteAgentAsync(int userId);

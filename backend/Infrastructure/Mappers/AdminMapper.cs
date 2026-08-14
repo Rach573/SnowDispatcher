@@ -5,13 +5,14 @@ namespace SnowDispatcher.Infrastructure.Mappers;
 
 public static class AdminMapper
 {
-    public static AdminAgent ToCore(AdminAgentDbModel agent)
+    public static AgentDashboardInfo ToCore(AgentDashboardInfoDbModel agent)
     {
-        return new AdminAgent
+        return new AgentDashboardInfo
         {
             UserId = agent.UserId,
             Username = agent.Username,
             StaffId = agent.StaffId,
+            NombreEnfants = agent.NombreEnfants,
             NomComplet = agent.NomComplet,
             AdresseMail = agent.AdresseMail,
             StatutHierarchique = agent.StatutHierarchique,

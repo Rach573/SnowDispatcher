@@ -5,8 +5,8 @@ namespace SnowDispatcher.Infrastructure.Repositories;
 public interface IUserRepository
 {
     Task<UserAuthDbModel?> AuthenticateAsync(string username, string passwordHash, string legacyPlainPassword);
-    Task<IEnumerable<AdminAgentDbModel>> GetAdminAgentsAsync();
+    Task<IEnumerable<AgentDashboardInfoDbModel>> GetAgentDashboardInfoAsync();
     Task UpdateAgentPasswordHashAsync(int userId, string passwordHash);
-    Task DeleteAgentAsync(int userId);
-    Task<int> AddAgentAsync(string username, int? staffId, string passwordHash, int nombreEnfants);
+    Task DeleteAgentDashboardInfoAsync(int userId);
+    Task<int> AddAgentDashboardInfoAsync(string username, int? staffId, string passwordHash, int nombreEnfants);
 }

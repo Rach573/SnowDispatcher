@@ -35,19 +35,20 @@ public class UserGateway : IUserGateway
         return _userRepository.UpdateAgentPasswordHashAsync(userId, passwordHash);
     }
 
-    public async Task<IEnumerable<AdminAgent>> GetAdminAgentsAsync()
+    public async Task<IEnumerable<AgentDashboardInfo>> GetAgentDashboardInfoAsync()
     {
-        var agents = await _userRepository.GetAdminAgentsAsync();
+        var agents = await _userRepository.GetAgentDashboardInfoAsync();
         return agents.Select(AdminMapper.ToCore);
     }
-
-    public Task DeleteAgentAsync(int userId)
+    
+    
+    public Task DeleteAgentDashboardInfoAsync(int userId)
     {
-        return _userRepository.DeleteAgentAsync(userId);
+        return _userRepository.DeleteAgentDashboardInfoAsync(userId);
     }
 
-    public Task<int> AddAgentAsync(string username, int? staffId, string passwordHash, int nombreEnfants)
+    public Task<int> AddAgentDashboardInfoAsync(string username, int? staffId, string passwordHash, int nombreEnfants)
     {
-        return _userRepository.AddAgentAsync(username, staffId, passwordHash, nombreEnfants); 
+        return _userRepository.AddAgentDashboardInfoAsync(username, staffId, passwordHash, nombreEnfants); 
     }
 }

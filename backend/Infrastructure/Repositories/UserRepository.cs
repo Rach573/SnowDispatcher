@@ -39,13 +39,14 @@ public class UserRepository : IUserRepository
         await connection.ExecuteAsync(sql, new { userId, passwordHash });
     }
 
-    public async Task<IEnumerable<AdminAgentDbModel>> GetAdminAgentsAsync()
+    public async Task<IEnumerable<AgentDashboardInfoDbModel>> GetAgentDashboardInfoAsync()
     {
         const string sql = """
             SELECT
                 u.id AS UserId,
                 u.username AS Username,
                 u.staff_id AS StaffId,
+                u.nombre_enfants AS NombreEnfants,
                 COALESCE(s.nom_complet, u.username) AS NomComplet,
                 COALESCE(s.adresse_mail, '') AS AdresseMail,
                 COALESCE(s.statut_hierarchique, 'Agent') AS StatutHierarchique,
@@ -54,18 +55,18 @@ public class UserRepository : IUserRepository
             LEFT JOIN staff s ON s.id = u.staff_id
             LEFT JOIN taches t ON t.agent_user_id = u.id
             WHERE u.role = 'agent'
-            GROUP BY u.id, u.username, u.staff_id, s.nom_complet, s.adresse_mail, s.statut_hierarchique
+            GROUP BY u.id, u.username, u.staff_id, u.nombre_enfants, s.nom_complet, s.adresse_mail, s.statut_hierarchique
             ORDER BY NomComplet, u.username;
             """;
 
         using var connection = _connectionFactory.CreateConnection();
-        return await connection.QueryAsync<AdminAgentDbModel>(sql);
+        return await connection.QueryAsync<AgentDashboardInfoDbModel>(sql);
     }
 
-    public async Task<int> AddAgentAsync(string username, int? staffId,string passwordHash, int nombreEnfants)
+    public async Task<int> AddAgentDashboardInfoAsync(string username, int? staffId,string passwordHash, int nombreEnfants)
     {
         const string sql = @"
-            INSERT INTO users (username, staff_id, password_hash, nombreEnfants, role)
+            INSERT INTO users (username, staff_id, password_hash, nombre_enfants, role)
             VALUES (@username, @staffId, @passwordHash, @nombreEnfants, 'agent');
             SELECT LAST_INSERT_ID();";
 
@@ -73,7 +74,7 @@ public class UserRepository : IUserRepository
         return await connection.QuerySingleAsync<int>(sql, new { username, staffId, passwordHash, nombreEnfants });
     }
 
-    public async Task DeleteAgentAsync(int userId)
+    public async Task DeleteAgentDashboardInfoAsync(int userId)
     {
         using var connection = _connectionFactory.CreateConnection();
         connection.Open();

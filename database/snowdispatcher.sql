@@ -57,9 +57,11 @@ CREATE TABLE users (
   password_hash VARCHAR(255) NOT NULL,
   role ENUM('admin', 'agent') NOT NULL DEFAULT 'agent',
   staff_id INT DEFAULT NULL,
+  nombre_enfants INT NOT NULL DEFAULT 0,
   PRIMARY KEY (id),
   UNIQUE KEY uq_users_username (username),
   UNIQUE KEY uq_users_staff_id (staff_id),
+  CONSTRAINT chk_users_nombre_enfants CHECK (nombre_enfants >= 0),
   CONSTRAINT fk_users_staff
     FOREIGN KEY (staff_id) REFERENCES staff(id)
     ON DELETE SET NULL ON UPDATE CASCADE
@@ -159,9 +161,9 @@ INSERT INTO staff (id, nom_complet, adresse_mail, statut_hierarchique, departeme
 -- admin / admin123
 -- carol / agent123
 -- Les mots de passe sont stockés sous forme de hash SHA-256, comme dans l'application.
-INSERT INTO users (id, username, password_hash, role, staff_id) VALUES
-  (1, 'admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'admin', NULL),
-  (2, 'carol', 'f44d1ac9bf0c69b083380b86dbdf3b73797150e3cca4820ac399f7917e607647', 'agent', 6);
+INSERT INTO users (id, username, password_hash, role, staff_id, nombre_enfants) VALUES
+  (1, 'admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'admin', NULL, 0),
+  (2, 'carol', 'f44d1ac9bf0c69b083380b86dbdf3b73797150e3cca4820ac399f7917e607647', 'agent', 6, 0);
 
 INSERT INTO mail (id, objet, contenu, date_reception, expediteur_staff_id, categorie_id, privacy_id) VALUES
   (1, 'Demande de congés', 'Bonjour, je souhaite poser deux jours de congé en décembre.', '2026-08-01 09:15:00', 1, 3, 2),

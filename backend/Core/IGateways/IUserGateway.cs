@@ -5,8 +5,8 @@ namespace SnowDispatcher.Core.IGateways;
 public interface IUserGateway
 {
     Task<AuthenticatedUser?> AuthenticateAsync(string username, string passwordHash, string legacyPlainPassword);
-    Task<IEnumerable<AdminAgent>> GetAdminAgentsAsync();
+    Task<IEnumerable<AgentDashboardInfo>> GetAgentDashboardInfoAsync();
     Task UpdateAgentPasswordHashAsync(int userId, string passwordHash);
-    Task DeleteAgentAsync(int userId);
-    Task<int> AddAgentAsync(string username, int? staffId, string passwordHash, int nombreEnfants);
+    Task DeleteAgentDashboardInfoAsync(int userId);
+    Task<int> AddAgentDashboardInfoAsync(string username, int? staffId, string passwordHash, int nombreEnfants);
 }

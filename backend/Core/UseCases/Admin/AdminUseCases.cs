@@ -14,9 +14,9 @@ public class AdminUseCases : IAdminUseCases
         _tacheGateway = tacheGateway;
     }
 
-    public Task<IEnumerable<AdminAgent>> GetAgentsAsync()
+    public Task<IEnumerable<AgentDashboardInfo>> GetAgentsAsync()
     {
-        return _userGateway.GetAdminAgentsAsync();
+        return _userGateway.GetAgentDashboardInfoAsync();
     }
 
     public async Task<IEnumerable<AdminMailAssignment>> GetMailAssignmentsAsync()
@@ -35,11 +35,11 @@ public class AdminUseCases : IAdminUseCases
 
     public Task DeleteAgentAsync(int userId)
     {
-        return _userGateway.DeleteAgentAsync(userId);
+        return _userGateway.DeleteAgentDashboardInfoAsync(userId);
     }
 
     public Task<int> AddAgentAsync(string username, int? staffId, string passwordHash, int nombreEnfants)
     {
-        return _userGateway.AddAgentAsync(username, staffId, passwordHash, nombreEnfants);
+        return _userGateway.AddAgentDashboardInfoAsync(username, staffId, passwordHash, nombreEnfants);
     }
 }

@@ -8,12 +8,14 @@ public class StatUseCases : IStatsUseCases
     private readonly ITacheGateway _tacheGateway;
     private readonly IStaffGateway _staffGateway;
     private readonly IMailGateway _mailGateway;
+    private readonly IUserGateway _userGateway;
 
-    public StatUseCases(ITacheGateway tacheGateway, IStaffGateway staffGateway, IMailGateway mailGateway)
+    public StatUseCases(ITacheGateway tacheGateway, IStaffGateway staffGateway, IMailGateway mailGateway, IUserGateway userGateway)
     {
         _tacheGateway = tacheGateway;
         _staffGateway = staffGateway;
         _mailGateway = mailGateway;
+        _userGateway = userGateway;
     }
 
     public async Task<IEnumerable<Stat>> GetMailStatsByPriorityAsync()
@@ -48,14 +50,17 @@ public class StatUseCases : IStatsUseCases
 
     public async Task<IEnumerable<Stat>> GetMailStatsByChildrenAsync()
     {
-        var staff = await _staffGateway.GetAllAsync();
-        var mails = await _mailGateway.GetAllAsync();
+        var agents = await _userGateway.GetAgentDashboardInfoAsync();
+        var mails = await _tacheGateway.GetAdminMailAssignmentsAsync();
 
         return mails
+            .Where(m => 
+            
+                m.Status == "Résolu" &&
+                m.AgentUserId.HasValue)
             .Select(m => new
             {
-                Mail = m,
-                HasChildren = staff.Any(s => s.Id == m.StaffId && s.NombreEnfants > 0)
+                HasChildren = agents.Any(a => a.UserId == m.AgentUserId.Value && a.NombreEnfants > 0)
             })
             .GroupBy(x => x.HasChildren ? "Avec enfants" : "Sans enfants")
             .Select(g => new Stat

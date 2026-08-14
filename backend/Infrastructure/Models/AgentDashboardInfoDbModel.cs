@@ -1,6 +1,6 @@
-namespace SnowDispatcher.Core.Models;
+namespace SnowDispatcher.Infrastructure.Models;
 
-public class AdminAgent
+public class AgentDashboardInfoDbModel
 {
     public int UserId { get; set; }
     public string Username { get; set; } = string.Empty;
@@ -9,4 +9,5 @@ public class AdminAgent
     public string AdresseMail { get; set; } = string.Empty;
     public string StatutHierarchique { get; set; } = string.Empty;
     public int ActiveMailCount { get; set; }
+    public int NombreEnfants { get; set; }
 }
