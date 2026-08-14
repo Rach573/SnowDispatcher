@@ -14,6 +14,14 @@ export class AdminPanelComponent implements OnInit {
   totalMails = computed(() => {
   return this.mailAssignments().length;
   });
+  treatedMails = computed(() => {
+  return this.mailAssignments()
+    .filter(mail => mail.status === 'Résolu')
+    .length;
+  });
+  remainingMails = computed(() => {
+    return this.mailAssignments().length - this.treatedMails();
+  });
   agents: any[] = [];
   selectedAgent: any = null;
   selectedAgentMails: any[] = [];
