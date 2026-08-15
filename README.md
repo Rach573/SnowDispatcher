@@ -1,23 +1,55 @@
 # SnowDispatcher
 
-## Démarrer l'application avec VS Code
+## Prérequis
 
-Respecter l'ordre suivant :
+- .NET SDK 8.0.416 pour Windows x64 : [télécharger l'installateur officiel](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-8.0.416-windows-x64-installer) ;
+- Node.js et npm ;
+- XAMPP avec MySQL et phpMyAdmin.
+
+## Installation et lancement
+
+Respecter l'ordre des étapes suivantes.
+
+### 1. Initialiser la base de données
 
 1. Ouvrir **XAMPP** et démarrer le serveur **MySQL**.
-2. Dans VS Code, ouvrir un terminal intégré à la racine du dossier `backend/Api`, puis exécuter :
+2. Ouvrir `http://localhost/phpmyadmin`.
+3. Choisir l'onglet **Importer**.
+4. Sélectionner le script `database/snowdispatcher.sql`.
+5. Lancer l'import du script.
+
+Le script supprime puis recrée entièrement la base `snowdispatcher`. Il ne faut pas l'exécuter sur une base contenant des données à conserver.
+
+Avec une installation XAMPP standard utilisant le compte `root` sans mot de passe, aucune configuration supplémentaire n'est nécessaire. La connexion utilisée est :
+
+```text
+Server=127.0.0.1;Port=3306;Database=snowdispatcher;User=root;Password=;
+```
+
+Si le compte MySQL possède un mot de passe personnalisé, modifier la chaîne `SnowDispatcher` dans `backend/Api/appsettings.Development.json`.
+
+### 2. Lancer le backend
+
+Dans VS Code, ouvrir un terminal intégré à la racine du dossier `backend/Api`, puis exécuter :
 
 ```powershell
 dotnet run
 ```
 
-3. Dans VS Code, ouvrir un deuxième terminal intégré à la racine du dossier `frontend/SnowDispatcher.Frontend`, puis exécuter :
+L'API démarre sur `http://localhost:5102`.
+
+### 3. Lancer le frontend
+
+Après le backend, ouvrir un deuxième terminal intégré à la racine du dossier `frontend/SnowDispatcher.Frontend`, puis exécuter :
 
 ```powershell
+npm install
 npm start
 ```
 
-Le backend doit être lancé avant le frontend. L'API démarre sur `http://localhost:5102` et l'application Angular est ensuite accessible sur `http://localhost:4200`.
+`npm install` est nécessaire uniquement lors de la première installation. Pour les démarrages suivants, exécuter directement `npm start`.
+
+L'application est ensuite accessible sur `http://localhost:4200`.
 
 SnowDispatcher est une application web de gestion et de répartition de mails entre des agents. Un administrateur peut consulter les mails reçus, les attribuer à un agent, gérer les comptes agents et visualiser des statistiques. Un agent peut consulter les mails qui lui sont assignés et les marquer comme traités.
 
@@ -32,7 +64,6 @@ SnowDispatcher est une application web de gestion et de répartition de mails en
 - consulter la charge de chaque agent ;
 - consulter les mails attribués à un agent ;
 - **ajouter un compte agent traitant les mails** ;
-- associer facultativement ce compte à un membre du staff ;
 - modifier le mot de passe d'un agent ;
 - supprimer un agent et désattribuer automatiquement ses mails ;
 - consulter les statistiques par priorité, statut et nombre d'enfants.
@@ -78,104 +109,14 @@ Composant Angular
   -> MariaDB/MySQL
 ```
 
-## Prérequis
-
-- .NET SDK 8.0 ;
-- Node.js et npm ;
-- Angular CLI 17, ou utilisation de la CLI locale avec `npm` ;
-- MariaDB 10.4+ ou MySQL 8+ ;
-- XAMPP peut être utilisé pour MariaDB et phpMyAdmin.
-
-## 1. Installer la base de données
-
-Le script complet se trouve dans :
-
-```text
-database/snowdispatcher.sql
-```
-
-Attention : ce script supprime puis recrée entièrement la base `snowdispatcher`. Ne pas l'exécuter sur une base contenant des données à conserver.
-
-### Avec phpMyAdmin
-
-1. Démarrer MySQL depuis XAMPP.
-2. Ouvrir `http://localhost/phpmyadmin`.
-3. Choisir l'onglet **Importer**.
-4. Sélectionner `database/snowdispatcher.sql`.
-5. Lancer l'import.
-
-### Avec le client MySQL/MariaDB
-
-Depuis la racine du projet :
-
-```powershell
-mysql -u root -p < database/snowdispatcher.sql
-```
-
-Si le compte `root` n'a pas de mot de passe :
-
-```powershell
-mysql -u root < database/snowdispatcher.sql
-```
-
-## 2. Configurer le backend
-
-Par défaut, l'application utilise cette connexion locale :
-
-```text
-Server=127.0.0.1;Port=3306;Database=snowdispatcher;User=root;Password=;
-```
-
-Pour utiliser d'autres identifiants, ajouter une section `ConnectionStrings` dans `backend/Api/appsettings.Development.json` :
-
-```json
-{
-  "ConnectionStrings": {
-    "SnowDispatcher": "Server=127.0.0.1;Port=3306;Database=snowdispatcher;User=root;Password=votre_mot_de_passe;"
-  }
-}
-```
-
-La clé JWT présente dans `appsettings.json` est une clé de développement. Pour un déploiement réel, elle doit être remplacée par une valeur secrète fournie par variable d'environnement ou gestionnaire de secrets.
-
-## 3. Lancer le backend avec VS Code
-
-Ouvrir un terminal intégré à la racine du dossier `backend/Api` :
-
-```powershell
-dotnet run
-```
-
-L'API écoute alors sur :
-
-```text
-http://localhost:5102
-```
-
-## 4. Lancer le frontend avec VS Code
-
-Après le backend, ouvrir un deuxième terminal intégré à la racine du dossier `frontend/SnowDispatcher.Frontend` :
-
-```powershell
-npm start
-```
-
-Ouvrir ensuite l'adresse affichée par Angular, généralement :
-
-```text
-http://localhost:4200
-```
-
-Le frontend est configuré pour appeler le backend sur `http://localhost:5102`.
-
 ## Comptes de démonstration
 
 | Rôle | Identifiant | Mot de passe |
 |---|---|---|
 | Administrateur | `admin` | `admin123` |
-| Agent | `carol` | `agent123` |
+| Agent | `carole` | `agent123` |
 
-L'administrateur peut créer d'autres comptes agents depuis l'onglet **Agents** avec le bouton **Ajouter un agent**. L'identifiant du staff est facultatif. S'il est fourni, il doit correspondre à un membre existant et ne peut être associé qu'à un seul compte utilisateur.
+L'administrateur peut créer d'autres comptes agents depuis l'onglet **Agents** avec le bouton **Ajouter un agent**. Les comptes utilisateurs servent à l'authentification et au traitement des mails. Les membres du staff sont enregistrés séparément et ne sont pas des comptes utilisateurs.
 
 ## Routes principales de l'API
 
@@ -225,7 +166,7 @@ Parcours manuels à vérifier :
 2. ajout d'un nouvel agent ;
 3. attribution puis réattribution d'un mail ;
 4. consultation des statistiques ;
-5. connexion avec `carol` ;
+5. connexion avec `carole` ;
 6. consultation et traitement d'une tâche ;
 7. contrôle des restrictions de rôle.
 
@@ -243,6 +184,20 @@ Vérifier :
 - que la base `snowdispatcher` a bien été importée ;
 - le port, l'utilisateur et le mot de passe de la chaîne de connexion ;
 - qu'une seule instance MySQL utilise le port configuré.
+
+### Le SDK .NET demandé est introuvable
+
+Le fichier `Global.json` impose le SDK .NET `8.0.416`. Si le terminal affiche `A compatible .NET SDK was not found` ou signale que `Microsoft.AspNetCore.App` est introuvable, installer le [SDK .NET 8.0.416 pour Windows x64](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-8.0.416-windows-x64-installer), puis relancer `dotnet run`.
+
+### La commande `ng` n'est pas reconnue
+
+Dans un terminal ouvert à la racine de `frontend/SnowDispatcher.Frontend`, exécuter d'abord :
+
+```powershell
+npm install
+```
+
+Relancer ensuite l'application avec `npm start`.
 
 ### Le frontend ne communique pas avec l'API
 

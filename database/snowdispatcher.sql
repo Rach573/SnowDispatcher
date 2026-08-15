@@ -158,11 +158,11 @@ INSERT INTO staff (id, nom_complet, adresse_mail, statut_hierarchique, departeme
 
 -- Mots de passe de démonstration :
 -- admin / admin123
--- carol / agent123
+-- carole / agent123
 -- Les mots de passe sont stockés sous forme de hash SHA-256, comme dans l'application.
 INSERT INTO users (id, username, password_hash, role, staff_id, nombre_enfants) VALUES
   (1, 'admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'admin', NULL, 0),
-  (2, 'carol', 'f44d1ac9bf0c69b083380b86dbdf3b73797150e3cca4820ac399f7917e607647', 'agent', 6, 0);
+  (2, 'carole', 'f44d1ac9bf0c69b083380b86dbdf3b73797150e3cca4820ac399f7917e607647', 'agent', NULL, 0);
 
 INSERT INTO mail (id, objet, contenu, date_reception, expediteur_staff_id, categorie_id, privacy_id) VALUES
   (1, 'Demande de congés', 'Bonjour, je souhaite poser deux jours de congé en décembre.', '2026-08-01 09:15:00', 1, 3, 2),
