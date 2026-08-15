@@ -23,7 +23,7 @@
           <div class="hierarchy-section">
             <h2>{{ hierarchy }}</h2>
             <div class="staff-list">
-              @if (groupedStaff[hierarchy]?.length === 0) {
+              @if (groupedStaff[hierarchy].length === 0) {
                 <div class="no-data">
                   <p>Aucun membre du staff {{ hierarchy }}</p>
                 </div>

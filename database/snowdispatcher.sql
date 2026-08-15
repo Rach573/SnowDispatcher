@@ -75,7 +75,6 @@ CREATE TABLE mail (
   expediteur_staff_id INT DEFAULT NULL,
   categorie_id INT DEFAULT NULL,
   privacy_id INT DEFAULT NULL,
-  handler_user_id INT UNSIGNED DEFAULT NULL,
   PRIMARY KEY (id),
   KEY idx_mail_expediteur (expediteur_staff_id),
   KEY idx_mail_categorie (categorie_id),

@@ -38,8 +38,7 @@ SnowDispatcher est une application web de gestion et de répartition de mails en
 ### Gestion du staff
 
 - consulter les membres du personnel ;
-- ajouter un membre du personnel ;
-- supprimer un membre du personnel.
+- afficher les membres regroupés selon leur niveau hiérarchique.
 
 ## Technologies
 
@@ -116,7 +115,7 @@ mysql -u root < database/snowdispatcher.sql
 Par défaut, l'application utilise cette connexion locale :
 
 ```text
-Server=localhost;Database=snowdispatcher;User=root;Password=;
+Server=127.0.0.1;Port=3306;Database=snowdispatcher;User=root;Password=;
 ```
 
 Pour utiliser d'autres identifiants, ajouter une section `ConnectionStrings` dans `backend/Api/appsettings.Development.json` :
@@ -124,7 +123,7 @@ Pour utiliser d'autres identifiants, ajouter une section `ConnectionStrings` dan
 ```json
 {
   "ConnectionStrings": {
-    "SnowDispatcher": "Server=localhost;Port=3306;Database=snowdispatcher;User=root;Password=votre_mot_de_passe;"
+    "SnowDispatcher": "Server=127.0.0.1;Port=3306;Database=snowdispatcher;User=root;Password=votre_mot_de_passe;"
   }
 }
 ```
