@@ -199,6 +199,10 @@ export class AdminPanelComponent implements OnInit {
       }
     );
   }
+  
+  navigateToStaff(): void {
+    this.router.navigate(['/staff']);
+  }
 
   addAgent(): void {
     const username = prompt('Nom d utilisateur pour le nouvel agent');

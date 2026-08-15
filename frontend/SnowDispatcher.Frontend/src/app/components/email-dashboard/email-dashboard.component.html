@@ -16,35 +16,42 @@
       <button type="button" class="btn btn-secondary" (click)="loadMails()">Rafraichir</button>
     </div>
 
-    <div *ngIf="loading" class="loading">
-      <p>Chargement des mails attribues...</p>
-    </div>
+    @if (loading) {
+      <div class="loading">
+        <p>Chargement des mails attribues...</p>
+      </div>
+    }
 
-    <div *ngIf="!loading && mails.length === 0" class="no-data">
-      <p>Aucun mail ne t'est attribue.</p>
-    </div>
+    @if (!loading && mails.length === 0) {
+      <div class="no-data">
+        <p>Aucun mail ne t'est attribue.</p>
+      </div>
+    }
 
-    <div *ngIf="!loading && mails.length > 0" class="mails-list">
-      <article *ngFor="let mail of mails" class="mail-card" [class.done]="mail.status === 'Résolu'">
-        <div class="mail-header">
-          <div>
-            <h2>{{ mail.subject }}</h2>
-            <p>De {{ mail.senderName || mail.senderEmail || 'expediteur inconnu' }} - {{ mail.receivedAt | date:'dd/MM/yyyy HH:mm' }}</p>
-          </div>
-          <span class="status-badge">{{ mail.status }}</span>
-        </div>
-
-        <p class="body">{{ mail.body }}</p>
-
-        <button
-          *ngIf="mail.status !== 'Résolu'"
-          type="button"
-          class="btn btn-primary"
-          [disabled]="updatingTaskId === mail.taskId"
-          (click)="markAsTreated(mail)">
-          {{ updatingTaskId === mail.taskId ? 'Mise a jour...' : 'Marquer comme traite' }}
-        </button>
-      </article>
-    </div>
+    @if (!loading && mails.length > 0) {
+      <div class="mails-list">
+        @for (mail of mails; track mail) {
+          <article class="mail-card" [class.done]="mail.status === 'Résolu'">
+            <div class="mail-header">
+              <div>
+                <h2>{{ mail.subject }}</h2>
+                <p>De {{ mail.senderName || mail.senderEmail || 'expediteur inconnu' }} - {{ mail.receivedAt | date:'dd/MM/yyyy HH:mm' }}</p>
+              </div>
+              <span class="status-badge">{{ mail.status }}</span>
+            </div>
+            <p class="body">{{ mail.body }}</p>
+            @if (mail.status !== 'Résolu') {
+              <button
+                type="button"
+                class="btn btn-primary"
+                [disabled]="updatingTaskId === mail.taskId"
+                (click)="markAsTreated(mail)">
+                {{ updatingTaskId === mail.taskId ? 'Mise a jour...' : 'Marquer comme traite' }}
+              </button>
+            }
+          </article>
+        }
+      </div>
+    }
   </main>
 </div>
