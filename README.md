@@ -1,15 +1,23 @@
 # SnowDispatcher
 
-## Demarrage rapide apres un redemarrage du PC
+## Démarrer l'application avec VS Code
 
-1. Demarrer **MySQL** dans XAMPP.
-2. Depuis la racine du projet, executer :
+Respecter l'ordre suivant :
+
+1. Ouvrir **XAMPP** et démarrer le serveur **MySQL**.
+2. Dans VS Code, ouvrir un terminal intégré à la racine du dossier `backend/Api`, puis exécuter :
 
 ```powershell
-.\demarrer-snowdispatcher.ps1
+dotnet run
 ```
 
-Le script verifie MariaDB sur le port `3306`, puis demarre l'API sur `5102` et Angular sur `4200`. Pour verifier rapidement l'API, ouvrir `http://localhost:5102/`. Pour verifier la connexion a la base, ouvrir `http://localhost:5102/debug/db`.
+3. Dans VS Code, ouvrir un deuxième terminal intégré à la racine du dossier `frontend/SnowDispatcher.Frontend`, puis exécuter :
+
+```powershell
+npm start
+```
+
+Le backend doit être lancé avant le frontend. L'API démarre sur `http://localhost:5102` et l'application Angular est ensuite accessible sur `http://localhost:4200`.
 
 SnowDispatcher est une application web de gestion et de répartition de mails entre des agents. Un administrateur peut consulter les mails reçus, les attribuer à un agent, gérer les comptes agents et visualiser des statistiques. Un agent peut consulter les mails qui lui sont assignés et les marquer comme traités.
 
@@ -130,13 +138,12 @@ Pour utiliser d'autres identifiants, ajouter une section `ConnectionStrings` dan
 
 La clé JWT présente dans `appsettings.json` est une clé de développement. Pour un déploiement réel, elle doit être remplacée par une valeur secrète fournie par variable d'environnement ou gestionnaire de secrets.
 
-## 3. Lancer le backend
+## 3. Lancer le backend avec VS Code
 
-Depuis la racine du projet :
+Ouvrir un terminal intégré à la racine du dossier `backend/Api` :
 
 ```powershell
-dotnet restore SnowDispatcher.sln
-dotnet run --project backend/Api/Api.csproj --urls http://localhost:5102
+dotnet run
 ```
 
 L'API écoute alors sur :
@@ -145,13 +152,11 @@ L'API écoute alors sur :
 http://localhost:5102
 ```
 
-## 4. Lancer le frontend
+## 4. Lancer le frontend avec VS Code
 
-Dans un second terminal :
+Après le backend, ouvrir un deuxième terminal intégré à la racine du dossier `frontend/SnowDispatcher.Frontend` :
 
 ```powershell
-cd frontend/SnowDispatcher.Frontend
-npm install
 npm start
 ```
 
